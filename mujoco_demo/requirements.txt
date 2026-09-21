@@ -1,0 +1,6 @@
+# 核心依赖
+numpy
+mujoco
+
+# 可选：轨迹规划后端，未安装时自动降级为 quintic 插值
+# ruckig
