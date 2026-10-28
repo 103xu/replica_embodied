@@ -1,0 +1,16 @@
+# Sections 1-2 only. PyTorch/torchvision are supplied by the existing my_env.
+mujoco==3.1.6
+numpy==2.2.6
+scipy==1.15.3
+matplotlib==3.10.9
+pillow==12.3.0
+opencv-python-headless==4.12.0.88
+datasets==3.4.1
+huggingface-hub==0.34.6
+av==14.2.0
+jsonlines==4.0.0
+deepdiff==8.6.1
+draccus==0.10.0
+einops==0.8.1
+termcolor==3.1.0
+pyserial==3.5

@@ -1,0 +1,10 @@
+{
+  "dataset": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\data\\scripted_demo_004",
+  "episode": 0,
+  "expected_frames": 602,
+  "replayed_frames": 602,
+  "complete": true,
+  "final_task_success": true,
+  "max_next_observation_position_error_m": 0.0,
+  "torch": "2.14.0+cu130"
+}

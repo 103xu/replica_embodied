@@ -1,0 +1,32 @@
+{
+  "mode": "scripted_ik",
+  "seed": 0,
+  "saved_episodes": 1,
+  "not_a_learned_policy": true,
+  "fps": 20,
+  "frames": 602,
+  "task_predicate_success": true,
+  "mug_lift_height_m": 0.20689425760148172,
+  "phase_start_frames": {
+    "approach": 0,
+    "descend": 44,
+    "close": 137,
+    "lift": 192,
+    "transfer": 295,
+    "lower": 403,
+    "release": 475,
+    "retreat": 530
+  },
+  "success_debug": {
+    "xy_dist": 0.008256076808380105,
+    "z_dist": 0.04468782293149187,
+    "ee_z": 1.0725448873019134,
+    "gripper_open_norm": 0.9999370200577709,
+    "success_xy_threshold": 0.1,
+    "success_z_threshold": 0.12,
+    "success_ee_height_threshold": 0.9,
+    "success_gripper_open_norm_threshold": 0.3,
+    "success_require_gripper_open": true,
+    "success": true
+  }
+}

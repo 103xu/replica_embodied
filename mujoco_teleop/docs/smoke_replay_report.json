@@ -1,0 +1,10 @@
+{
+  "dataset": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\data\\smoke_001",
+  "episode": 0,
+  "expected_frames": 40,
+  "replayed_frames": 40,
+  "complete": true,
+  "final_task_success": false,
+  "max_next_observation_position_error_m": 1.1935705401810992e-07,
+  "torch": "2.14.0+cu130"
+}

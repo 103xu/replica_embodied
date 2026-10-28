@@ -1,0 +1,5 @@
+mujoco_teleop/**/*.py text eol=lf
+mujoco_teleop/**/*.md text eol=lf
+mujoco_teleop/*.json text eol=lf
+# Keep the upstream bytes identical to upstream_manifest.json on Windows too.
+mujoco_teleop/vendor/** -text

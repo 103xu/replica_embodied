@@ -1,0 +1,264 @@
+import argparse
+import importlib.metadata
+import json
+from pathlib import Path
+import platform
+import sys
+import time
+
+
+def parser():
+    p = argparse.ArgumentParser(description='Every-Embodied OMY sections 1-2: collect and replay')
+    sub = p.add_subparsers(dest='command', required=True)
+    sub.add_parser('doctor', help='Report the active Python, dependencies, CUDA and model status')
+    collect = sub.add_parser('collect', help='Section 1: keyboard demonstration collection')
+    collect.add_argument('--dataset', type=Path, default=None)
+    collect.add_argument('--episodes', type=int, default=1)
+    collect.add_argument('--seed', type=int, default=0)
+    collect.add_argument('--max-seconds', type=float, default=None)
+    smoke = sub.add_parser('smoke', help='Automated collection/replay plumbing test; not a grasp demonstration')
+    smoke.add_argument('--dataset', type=Path, default=None)
+    smoke.add_argument('--frames', type=int, default=40)
+    smoke.add_argument('--headless', action='store_true')
+    smoke.add_argument('--fast', action='store_true')
+    demo = sub.add_parser('auto-demo', help='Run a scripted IK grasp and collect its actual physics trajectory')
+    demo.add_argument('--dataset', type=Path, default=None)
+    demo.add_argument('--seed', type=int, default=0)
+    demo.add_argument('--headless', action='store_true')
+    demo.add_argument('--fast', action='store_true')
+    replay = sub.add_parser('replay', help='Section 2: replay local action labels in MuJoCo')
+    replay.add_argument('--dataset', type=Path, default=None)
+    replay.add_argument('--episode', type=int, default=0)
+    replay.add_argument('--headless', action='store_true')
+    replay.add_argument('--fast', action='store_true')
+    replay.add_argument('--output', type=Path, default=None)
+    return p
+
+
+def doctor():
+    from .runtime import PROJECT, SCENE
+    import torch
+    result = {'python': sys.version, 'executable': sys.executable, 'platform': platform.platform(),
+              'cuda_available': torch.cuda.is_available(), 'torch': torch.__version__,
+              'device': torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU',
+              'scene_exists': SCENE.is_file(), 'project': str(PROJECT)}
+    for name in ('mujoco', 'numpy', 'scipy', 'datasets', 'lerobot', 'pyarrow', 'pillow'):
+        result[name] = importlib.metadata.version(name)
+    print(json.dumps(result, indent=2))
+
+
+def collect(args, smoke=False):
+    import numpy as np
+    from PIL import Image
+    from .dataset import add_frame, create_dataset, write_run
+    from .runtime import OMYEnvironment, PROJECT, pace
+
+    if smoke and args.frames < 2:
+        raise ValueError('--frames must be at least 2')
+    if not smoke and args.episodes < 1:
+        raise ValueError('--episodes must be positive')
+    root = args.dataset or PROJECT / 'data' / ('smoke' if smoke else 'demo_data')
+    dataset = create_dataset(root)
+    env = None
+    frames, episodes = 0, 0
+    started = False
+    results = []
+    initial_state = None
+    wall_start = time.perf_counter()
+    print('Focus the MuJoCo window. WASD/R/F: move; arrows/Q/E: rotate; Space: gripper; Z: discard/reset; Esc: quit.')
+    try:
+        env = OMYEnvironment(seed=0 if smoke else args.seed, headless=smoke and args.headless)
+        wall_start = time.perf_counter()
+        while env.alive():
+            start = time.perf_counter()
+            if not smoke and args.max_seconds and start - wall_start >= args.max_seconds:
+                break
+            if smoke:
+                action = np.zeros(7, dtype=np.float32)
+                action[2] = 0.001 if frames < args.frames // 2 else -0.001
+                reset = False
+            else:
+                action, reset = env.teleop_robot()
+            if reset:
+                dataset.clear_episode_buffer()
+                env.reset(seed=args.seed)
+                started = False
+                initial_state = None
+                continue
+            started = started or bool(np.any(action != 0))
+            if started and initial_state is None:
+                initial_state = env.snapshot()
+            # Observation is captured BEFORE preparing the current action label.
+            state = env.get_ee_pose().copy()
+            agent, wrist = env.images()
+            env.step(action)
+            if started:
+                add_frame(dataset, env, agent, wrist, state)
+                frames += 1
+            env.advance()
+            env.show(agent, wrist)
+            success = env.check_success()
+            if started and ((smoke and frames >= args.frames) or (not smoke and success)):
+                dataset.save_episode()
+                states = Path(root).resolve() / 'initial_states'
+                states.mkdir(exist_ok=True)
+                np.savez_compressed(states / f'episode_{episodes:06d}.npz', state=initial_state)
+                episodes += 1
+                results.append({'episode': episodes - 1, 'success': bool(success), 'smoke': smoke})
+                print(f'Saved episode {episodes}; physical task success={success}; smoke={smoke}')
+                if smoke or episodes >= args.episodes:
+                    if smoke:
+                        output = PROJECT / 'outputs'
+                        output.mkdir(exist_ok=True)
+                        Image.fromarray(agent).save(output / 'agent.png')
+                        Image.fromarray(wrist).save(output / 'wrist.png')
+                    break
+                env.reset(seed=args.seed)
+                started = False
+                initial_state = None
+            pace(start, smoke and args.fast)
+    finally:
+        if env is not None:
+            env.close()
+        dataset.stop_image_writer()
+        write_run(root, {'mode': 'smoke' if smoke else 'keyboard', 'saved_episodes': episodes,
+                         'recorded_frames_including_unsaved': frames, 'results': results,
+                         'observation_timing': 'before_command', 'action_type': 'absolute_joint_targets',
+                         'fps': 20})
+    print(f'Dataset: {Path(root).resolve()}; saved episodes: {episodes}')
+    if episodes == 0:
+        print('No successful episode saved. An unfinished episode is intentionally not training data.')
+
+
+def replay(args):
+    import numpy as np
+    import torch
+    from PIL import Image
+    from .dataset import load_dataset
+    from .runtime import OMYEnvironment, PROJECT, pace
+
+    root = args.dataset or PROJECT / 'data' / 'demo_data'
+    dataset = load_dataset(root)
+    if not 0 <= args.episode < dataset.num_episodes:
+        raise ValueError(f'Episode index must be in [0, {dataset.num_episodes})')
+    first = int(dataset.episode_data_index['from'][args.episode])
+    last = int(dataset.episode_data_index['to'][args.episode])
+    env = OMYEnvironment(seed=0, headless=args.headless, action_type='joint_angle')
+    errors, count = [], 0
+    try:
+        data = dataset[first]
+        initial = data['obj_init'].numpy()
+        env.set_obj_pose(initial[:3], initial[3:])
+        snapshot = Path(root) / 'initial_states' / f'episode_{args.episode:06d}.npz'
+        if snapshot.exists():
+            with np.load(snapshot, allow_pickle=False) as archive:
+                env.restore(archive['state'])
+        for i in range(first, last):
+            if not env.alive():
+                break
+            start = time.perf_counter()
+            data = dataset[i]
+            # Dataset access stays in the main process on Windows (no DataLoader workers).
+            action = data['action'].numpy().astype(np.float32)
+            env.step(action)
+            env.advance()
+            observed = env.get_ee_pose()
+            if i + 1 < last:
+                target = dataset[i + 1]['observation.state'].numpy()
+                errors.append(float(np.linalg.norm(observed[:3] - target[:3])))
+            agent = (data['observation.image'].permute(1, 2, 0).numpy() * 255).round().clip(0, 255).astype(np.uint8)
+            wrist = (data['observation.wrist_image'].permute(1, 2, 0).numpy() * 255).round().clip(0, 255).astype(np.uint8)
+            env.show(agent, wrist)
+            count += 1
+            pace(start, args.fast)
+        final_agent, final_wrist = env.images()
+        report = {'dataset': str(Path(root).resolve()), 'episode': args.episode,
+                  'expected_frames': last - first, 'replayed_frames': count,
+                  'complete': count == last - first, 'final_task_success': env.check_success(),
+                  'max_next_observation_position_error_m': max(errors, default=0),
+                  'torch': torch.__version__}
+        out = args.output or PROJECT / 'outputs' / 'replay_report.json'
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(report, indent=2), encoding='utf-8')
+        Image.fromarray(final_agent).save(out.with_name(out.stem + '_agent.png'))
+        Image.fromarray(final_wrist).save(out.with_name(out.stem + '_wrist.png'))
+        print(json.dumps(report, indent=2))
+    finally:
+        env.close()
+
+
+def scripted_collect(args):
+    import numpy as np
+    from PIL import Image
+    from .dataset import add_frame, create_dataset, write_run
+    from .runtime import OMYEnvironment, PROJECT, pace
+    from .scripted import scripted_actions
+
+    root = args.dataset or PROJECT / 'data' / 'scripted_demo'
+    dataset = create_dataset(root)
+    env = None
+    report = {'mode': 'scripted_ik', 'seed': args.seed, 'saved_episodes': 0,
+              'not_a_learned_policy': True, 'fps': 20}
+    frames = 0
+    preview = []
+    phase_starts = {}
+    try:
+        env = OMYEnvironment(seed=args.seed, headless=args.headless)
+        initial_state = env.snapshot()
+        initial_mug_height = float(env.get_obj_pose()[0][2])
+        max_mug_height = initial_mug_height
+        for phase, action in scripted_actions(env):
+            phase_starts.setdefault(phase, frames)
+            if not env.alive():
+                raise RuntimeError('Window closed before scripted demonstration completed.')
+            start = time.perf_counter()
+            state = env.get_ee_pose().copy()
+            agent, wrist = env.images()
+            env.step(action)
+            add_frame(dataset, env, agent, wrist, state)
+            env.advance()
+            env.show(agent, wrist)
+            frames += 1
+            if frames % 5 == 0:
+                preview.append(Image.fromarray(agent))
+            max_mug_height = max(max_mug_height, float(env.get_obj_pose()[0][2]))
+            pace(start, args.fast)
+        report.update({'frames': frames, 'task_predicate_success': env.check_success(),
+                       'mug_lift_height_m': max_mug_height - initial_mug_height,
+                       'phase_start_frames': phase_starts,
+                       'success_debug': env.get_success_debug()})
+        if not env.check_success() or report['mug_lift_height_m'] < 0.10:
+            raise RuntimeError('Scripted grasp did not meet both lift and final task criteria; no successful episode saved.')
+        dataset.save_episode()
+        states = Path(root).resolve() / 'initial_states'
+        states.mkdir(exist_ok=True)
+        np.savez_compressed(states / 'episode_000000.npz', state=initial_state)
+        report['saved_episodes'] = 1
+        output = PROJECT / 'outputs'
+        output.mkdir(exist_ok=True)
+        agent, wrist = env.images()
+        Image.fromarray(agent).save(output / 'scripted_agent.png')
+        Image.fromarray(wrist).save(output / 'scripted_wrist.png')
+        if preview:
+            preview[0].save(output / 'scripted_preview.gif', save_all=True,
+                            append_images=preview[1:], duration=250, loop=0)
+        print(json.dumps(report, indent=2))
+    finally:
+        if env is not None:
+            env.close()
+        dataset.stop_image_writer()
+        write_run(root, report)
+
+
+def main():
+    args = parser().parse_args()
+    if args.command == 'doctor':
+        doctor()
+    elif args.command == 'collect':
+        collect(args)
+    elif args.command == 'smoke':
+        collect(args, smoke=True)
+    elif args.command == 'replay':
+        replay(args)
+    elif args.command == 'auto-demo':
+        scripted_collect(args)

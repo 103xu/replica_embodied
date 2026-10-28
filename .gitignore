@@ -1,0 +1,15 @@
+# Python and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+.DS_Store
+
+# Reproduction dependencies and large generated data
+mujoco_teleop/.deps/
+mujoco_teleop/.downloads/
+mujoco_teleop/data/
+mujoco_teleop/outputs/
+# Plate OBJ is large: track the original ZIP and extract locally on first run.
+mujoco_teleop/vendor/every_embodied/asset/objaverse/plate_11/
