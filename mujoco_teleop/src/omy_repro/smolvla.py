@@ -15,8 +15,8 @@ from lerobot.common.policies.smolvla.modeling_smolvla import SmolVLAPolicy
 from lerobot.configs.policies import PreTrainedConfig
 
 from .act import chunk_indices, dataset_fingerprint, seed_everything
-from .language import load_language, target_height, task_status
-from .runtime import LanguageEnvironment, PROJECT, pace
+from .language import load_language, target_height, task_status, physical_candidate
+from .runtime import LanguageEnvironment, UpstreamLanguageEnvironment, PROJECT, pace
 
 
 def transfer_core(policy, filename):
@@ -237,7 +237,8 @@ def deploy(args):
         raise FileExistsError(f'Refusing to overwrite {output}')
     policy = load_policy(args.checkpoint, args.device)
     output.mkdir(parents=True)
-    env = LanguageEnvironment(seed=args.seed, headless=args.headless, action_type='joint_angle')
+    environment_class = UpstreamLanguageEnvironment if args.upstream_interface else LanguageEnvironment
+    env = environment_class(seed=args.seed, headless=args.headless, action_type='joint_angle')
     results = []
     try:
         for color in ('red', 'blue'):
@@ -246,6 +247,7 @@ def deploy(args):
             policy.reset()
             initial = maximum = target_height(env)
             frames, stable, preview, latencies = 0, 0, [], []
+            physical_stable, max_strict_stable, max_physical_stable, lift_run, max_lift_run = 0, 0, 0, 0, 0
             with (output / f'{color}.jsonl').open('w', encoding='utf-8', buffering=1) as log:
                 for step in range(args.max_steps):
                     if not env.alive():
@@ -266,14 +268,22 @@ def deploy(args):
                     env.step(command)
                     env.advance()
                     env.show(agent, wrist)
-                    maximum = max(maximum, target_height(env))
+                    height = target_height(env)
+                    maximum = max(maximum, height)
+                    lift_run = lift_run + 1 if height - initial >= 0.03 else 0
+                    max_lift_run = max(max_lift_run, lift_run)
                     status = task_status(env, initial, maximum)
                     stable = stable + 1 if status['strict_success'] else 0
-                    log.write(json.dumps({'step': step, 'instruction': env.instruction, 'action': command.tolist(), **status}) + '\n')
+                    physical_stable = physical_stable + 1 if physical_candidate(status, max_lift_run) else 0
+                    max_strict_stable = max(max_strict_stable, stable)
+                    max_physical_stable = max(max_physical_stable, physical_stable)
+                    log.write(json.dumps({'step': step, 'instruction': env.instruction, 'action': command.tolist(),
+                                          'current_lift_m': height - initial, 'max_consecutive_lift_ticks': max_lift_run,
+                                          'physical_stable_frames': physical_stable, **status}) + '\n')
                     if step % 10 == 0:
                         preview.append(Image.fromarray(agent))
                     frames = step + 1
-                    if stable >= 20:
+                    if (physical_stable if args.success_rule == 'physical' else stable) >= 20:
                         break
                     pace(start, args.fast)
             agent, wrist = env.images()
@@ -282,13 +292,19 @@ def deploy(args):
             if preview:
                 preview[0].save(output / f'{color}.gif', save_all=True, append_images=preview[1:], duration=500, loop=0)
             results.append({'instruction': env.instruction, 'seed': args.seed, 'steps': frames,
-                            'success': stable >= 20, 'stable_frames': stable, **status,
-                            'physical_success': stable >= 20 and status['upright'],
+                            'success': max_strict_stable >= 20, 'stable_frames': max_strict_stable, **status,
+                            'physical_success': max_physical_stable >= 20, 'physical_stable_frames': max_physical_stable,
+                            'max_consecutive_lift_ticks': max_lift_run,
                             'mean_action_call_ms': float(np.mean(latencies) * 1000)})
             print('SMOLVLA_ROLLOUT ' + json.dumps(results[-1]), flush=True)
         report = {'checkpoint': str(args.checkpoint.resolve()), 'controller': 'SmolVLA neural policy only',
+                  'environment_interface': 'upstream_SimpleEnv2' if args.upstream_interface else 'corrected_OMY_mapping',
+                  'camera_pipeline': '800x600_resized_to_256x256' if args.upstream_interface else 'native_256x256',
+                  'termination_rule': args.success_rule,
+                  'physical_rule': 'legacy success + lift >=3cm for >=3 consecutive ticks + final up-axis cosine >=0.85, stable for 20 ticks',
                   'uses_recorded_actions': False, 'uses_scripted_controller': False, 'uses_language': True,
-                  'state_type': 'joint_angle', 'fps': 20, 'successes': sum(row['success'] for row in results), 'trials': results}
+                  'state_type': 'joint_angle', 'fps': 20, 'successes': sum(row['success'] for row in results),
+                  'physical_successes': sum(row['physical_success'] for row in results), 'trials': results}
         (output / 'deployment_report.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
     finally:
         env.close()

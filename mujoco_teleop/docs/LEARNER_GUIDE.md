@@ -42,13 +42,15 @@ flowchart LR
 | 5．语言条件采集 | 已采集 20 条红/蓝杯示教 | 生成双任务数据，理解关节状态与语言标签 |
 | 6．语言条件可视化 | 已验证回放 | 对照指令、物体、动作与终态 |
 | 7．π0 训练与部署 | 配置检查通过；训练、部署未完成 | 检查资源与模型访问条件 |
-| 8．SmolVLA 训练与部署 | 已加载预训练模型、微调并实际部署测试 | 亲手训练；查看成功或失败报告 |
+| 8．SmolVLA 训练与部署 | 公开 OMY 权重两种指令物理成功；自训模型仍失败 | 先体验发布权重，再比较自训与部署 |
 | 9．策略诊断 / XR 扩展 | 已接入数据与策略诊断；XR 未运行 | 审计全部示教，区分语言敏感性与任务成功 |
 | 10．π0.5 微调 OMY | 已完成独立环境中的数据迁移与接口测试 | 检查 v3 数据；完整模型微调尚未完成 |
 
 下面区分本机实际运行的命令与尚未完成的模型实验。π0、π0.5 的完整训练受资源或访问条件限制；SmolVLA 已有真实训练和部署记录，任务效果以报告为准。上游 README 目录未列第 9 节，但源文件中包含策略诊断文档和 XR Notebook，这里已补全。
 
 **第一次建议这样安排：** 第一次完成模块 0–2，看见示教和回放；第二次完成模块 3–4，比较训练与部署；第三次从模块 5 开始学习语言数据和 SmolVLA，随后做诊断及 v3 转换。想先看看模型实际控制是什么样，可以完成模块 0 后直接体验 4.4，再回头学习数据和训练。
+
+想先看真正带语言输入的 VLA，可以完成模块 0 后直接运行 8.6，它会准备所需依赖和公开 OMY 权重。本机已验证红、蓝指令都能完成物理任务；它不是自己这轮训练产生的模型。
 
 ---
 
@@ -563,9 +565,44 @@ Get-Content ".\mujoco_teleop\outputs\learn_smol_deploy_$StudyTag\deployment_repo
 
 **预期：** 程序依次在相同初始场景执行红杯、蓝杯指令，输出报告、逐帧动作、末帧图和 GIF。这里动作只来自 SmolVLA，没有脚本接管。
 
+新版报告同时显示 `physical_successes`（第 9 节的抬升 3cm、持续与竖直规则，再稳定 20 帧）和 `successes`（原有 ACT 额外 10cm 检查）。主要看前者，并复核视频。默认按 `physical` 规则停止；要重跑原 10cm 对照，可加 `--success-rule strict`。两套口径不要混在一起比较。
+
 **已知结果：** 2,000 步、5 步动作窗口的模型，两条指令都没有完成严格抓放。机器人动起来、loss 下降和 checkpoint 能重新加载，均不等于任务成功。较长动作窗口的后续实验见 [VLA 复现记录](VLA_REPRODUCTION_LOG.md)。
 
 20Hz 是仿真的控制时间频率；模型推理较慢时，墙钟时间可以更久。默认每执行一个动作块再查询模型，报告里的平均动作调用耗时也包含从队列取动作的调用。
+
+### 8.5 长窗口对照：从已有模型继续学习
+
+完成自己的 2,000 步训练后，可以继续：
+
+```powershell
+$StudySmolLong = ".\mujoco_teleop\checkpoints\learn_smol_long_$StudyTag"
+& $StudyPython .\mujoco_teleop\run.py train-smolvla --dataset $StudyLanguageData --init-checkpoint "$StudySmolPractice\final" --output $StudySmolLong --steps 3000 --batch-size 8 --chunk-size 50 --learning-rate 0.00005 --holdout-episodes 2 --log-every 100
+& $StudyPython .\mujoco_teleop\run.py deploy-smolvla --checkpoint "$StudySmolLong\final" --output ".\mujoco_teleop\outputs\learn_smol_long_$StudyTag" --max-steps 1000
+```
+
+50 步动作块覆盖 2.5 秒，比原来的 5 步（0.25 秒）能看到更长的示教后续。这里载入已有模型参数，重新建立优化器；不是恢复原训练优化器状态。窗口、批量和训练次数都改变了，不能只把结果变化归因于窗口。
+
+本机已通过 batch=8、chunk=50 的五步检查，峰值分配显存约 3.1GB；3,000 步续训的最终结果与耗时见复现记录。每次新训练仍需重新部署检查。
+
+这轮 3,000 步续训实际约用 37.6 分钟，离线动作误差降低，但红、蓝任务仍未成功。保留这个结果，是为了让你看清“更低误差”和“能连续完成任务”的区别。
+
+### 8.6 教程公开权重的独立对照（选做）
+
+这条路线使用教程作者已经针对 OMY 微调的模型，与自己的训练结果分开：
+
+```powershell
+& $StudyPython .\mujoco_teleop\scripts\prepare_vla.py --tutorial-checkpoint
+& $StudyPython .\mujoco_teleop\run.py deploy-smolvla --checkpoint ".\mujoco_teleop\.downloads\models\omy_pnp_smolvla" --output ".\mujoco_teleop\outputs\learn_smol_public_$StudyTag" --max-steps 1000 --upstream-interface
+```
+
+这两条命令可以单独执行：准备脚本会安装项目附加依赖，并下载约 1.2GB 的公开权重与骨干配置/分词器，固定版本并校验 SHA256。已经准备好依赖时可加 `--skip-install`。不必为了体验发布模型先下载通用 base；自己训练时再做 8.1。公开模型针对其原数据训练，实际结果单独保存，不能记成自己训练的成功。
+
+这里的 `--upstream-interface` 使用上游 `SimpleEnv2` 原夹爪映射、积分器，以及 800×600 渲染后缩放到 256×256 的相机流程。移除它可以对照本地修正接口，但输出要另起目录。自己的模型继续使用采集时的默认接口，不要随意交换。张量形状相同，控制含义或相机视野仍可能不同。
+
+**本机预期结果：** seed=0 红杯、蓝杯均通过物理成功检查，报告 `physical_successes: 2`，杯子保持竖直。红杯曾抬升约 6.5cm、蓝杯约 11.6cm。旧 ACT 额外规则的 `successes: 0` 与这个结果并不冲突。先复核视频，再读 [详细记录](VLA_REPRODUCTION_LOG.md)。这两个同场景结果不能当作广泛泛化能力。
+
+已保存的有窗口运行：[红杯动画](vla_results/smolvla_tutorial_gui_seed0_red.gif)、[蓝杯动画](vla_results/smolvla_tutorial_gui_seed0_blue.gif)。它们是发布权重的真实模型动作。
 
 **过关问题：** ACT 和这次 SmolVLA 的输入区别在哪里？预训练参数与本任务归一化统计量为什么要分开处理？
 
@@ -715,7 +752,10 @@ Get-Content ".\mujoco_teleop\outputs\learn_language_audit_$StudyTag.json"
 | 脚本示教的动作从哪里来？ | [`scripted.py`](../src/omy_repro/scripted.py) |
 | ACT 的数据、配置、训练和离线评估？ | [`act.py`](../src/omy_repro/act.py) |
 | 真正部署时是否只使用模型？ | [`deploy_act.py`](../src/omy_repro/deploy_act.py) |
-| 原教程第 1–4 模块的 Notebook？ | [`vendor/every_embodied/`](../vendor/every_embodied/) |
-| 已经做过的实验和问题记录？ | [第 1、2 部分记录](REPRODUCTION_LOG.md)、[第 3、4 部分记录](ACT_REPRODUCTION_LOG.md) |
+| 语言数据怎样采集、回放与审计？ | [`language.py`](../src/omy_repro/language.py) |
+| VLA 怎样加载、微调和预测动作？ | [`smolvla.py`](../src/omy_repro/smolvla.py) |
+| π0.5 数据接口与独立环境？ | [`pi05_data.py`](../scripts/pi05_data.py)、[`prepare_pi05.py`](../scripts/prepare_pi05.py) |
+| 原教程第 1–10 模块的 Notebook？ | [`vendor/every_embodied/`](../vendor/every_embodied/) |
+| 已经做过的实验和问题记录？ | [第 1、2 部分记录](REPRODUCTION_LOG.md)、[第 3、4 部分记录](ACT_REPRODUCTION_LOG.md)、[第 5–10 部分记录](VLA_REPRODUCTION_LOG.md) |
 
 上游教程入口：[Every-Embodied 中的 MuJoCo / ACT / π0 / SmolVLA 教程](https://github.com/datawhalechina/every-embodied/tree/14d7c6c93debf01419b21e50b649a06f15881c38/06-%E7%AD%96%E7%95%A5%E6%8A%93%E5%8F%96%E6%88%96%E6%8A%93%E5%8F%96VLA/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%8E%A7%E5%88%B6%E3%80%81VLA%E3%80%81VLM/04mujoco%E5%A4%8D%E7%8E%B0ACT%E3%80%81Pi0%E3%80%81SmolVLA)。

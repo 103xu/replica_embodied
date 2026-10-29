@@ -30,23 +30,25 @@
 
 ## 快速运行（Windows PowerShell）
 
-在仓库根目录执行。`run.ps1` 优先寻找现有的 `my_env` 解释器，不依赖故障的 `conda.exe`。
+在仓库根目录执行，先设置当前终端的解释器变量。以下直接启动 Python，不受 `.ps1` 执行策略限制，也不依赖 `conda.exe`。`run.ps1` 保留为可选包装入口。
 
 ```powershell
+$PythonExe = "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe"
+
 # 查看解释器、依赖与场景资源
-.\mujoco_teleop\run.ps1 doctor
+& $PythonExe .\mujoco_teleop\run.py doctor
 
 # 先回放本机已生成的成功抓放轨迹
-.\mujoco_teleop\run.ps1 replay --dataset .\mujoco_teleop\data\scripted_demo_004
+& $PythonExe .\mujoco_teleop\run.py replay --dataset .\mujoco_teleop\data\scripted_demo_004
 
 # 第 1 部分：手动采集一条成功示教；路径相对于当前终端
-.\mujoco_teleop\run.ps1 collect --dataset .\mujoco_teleop\data\my_first_demo --episodes 1
+& $PythonExe .\mujoco_teleop\run.py collect --dataset .\mujoco_teleop\data\my_first_demo --episodes 1
 
 # 第 2 部分：回放刚才保存的第 0 条示教
-.\mujoco_teleop\run.ps1 replay --dataset .\mujoco_teleop\data\my_first_demo --episode 0
+& $PythonExe .\mujoco_teleop\run.py replay --dataset .\mujoco_teleop\data\my_first_demo --episode 0
 ```
 
-如果 PowerShell 执行策略阻止脚本，不必修改系统策略，可以直接使用解释器：
+如果不想设置变量，也可以直接写出解释器路径：
 
 ```powershell
 & "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe" .\mujoco_teleop\run.py doctor
@@ -90,7 +92,7 @@
 
 ```powershell
 # 无主窗口地验证回放；仍需要可工作的 OpenGL/桌面驱动
-.\mujoco_teleop\run.ps1 replay --dataset .\mujoco_teleop\data\my_first_demo --headless --fast
+& $PythonExe .\mujoco_teleop\run.py replay --dataset .\mujoco_teleop\data\my_first_demo --headless --fast
 ```
 
 `complete=true` 表示动作序列完整回放；`final_task_success` 表示末帧是否满足上游任务判定。这两个指标含义不同。`max_next_observation_position_error_m` 比较回放动作后的末端位置与下一条原始观测。
@@ -101,11 +103,11 @@
 
 ```powershell
 # 打开窗口，观看抓放并保存数据（新目录）
-.\mujoco_teleop\run.ps1 auto-demo --dataset .\mujoco_teleop\data\my_auto_demo
-.\mujoco_teleop\run.ps1 replay --dataset .\mujoco_teleop\data\my_auto_demo
+& $PythonExe .\mujoco_teleop\run.py auto-demo --dataset .\mujoco_teleop\data\my_auto_demo
+& $PythonExe .\mujoco_teleop\run.py replay --dataset .\mujoco_teleop\data\my_auto_demo
 
 # 无主窗口、加速执行同一控制流程
-.\mujoco_teleop\run.ps1 auto-demo --dataset .\mujoco_teleop\data\another_auto_demo --headless --fast
+& $PythonExe .\mujoco_teleop\run.py auto-demo --dataset .\mujoco_teleop\data\another_auto_demo --headless --fast
 ```
 
 默认 `seed=0` 是本机验证配置。脚本只通过机械臂关节和夹爪控制物体，不在运行过程中修改杯子位置或附加吸附约束。结束时同时检查杯子实际抬升超过 10 厘米、上游成功判定成立，才保存成功回合；失败不会伪装成成功示教。20 Hz、602 帧约对应 30.1 秒仿真。
@@ -127,8 +129,8 @@
 不需要手工操作的 `smoke` 模式只让机械臂小幅上下运动，生成**明确标记为 smoke 的接口测试数据**，不能用于声称完成抓杯实验或训练成功。再次运行时更换目录。
 
 ```powershell
-.\mujoco_teleop\run.ps1 smoke --dataset .\mujoco_teleop\data\smoke_check --headless --fast --frames 40
-.\mujoco_teleop\run.ps1 replay --dataset .\mujoco_teleop\data\smoke_check --headless --fast
+& $PythonExe .\mujoco_teleop\run.py smoke --dataset .\mujoco_teleop\data\smoke_check --headless --fast --frames 40
+& $PythonExe .\mujoco_teleop\run.py replay --dataset .\mujoco_teleop\data\smoke_check --headless --fast
 ```
 
 `--headless` 指不打开主窗口，仍会渲染相机图像；当前适配依赖上游的 GLFW/显示器检测，不保证可在完全没有显示服务的 Linux 服务器运行。
@@ -145,10 +147,10 @@
 
 ```powershell
 # 新克隆或本机没有数据时，先执行此命令生成训练示教；已有同名目录则跳过
-.\mujoco_teleop\run.ps1 auto-demo --dataset .\mujoco_teleop\data\scripted_demo_004 --headless --fast
+& $PythonExe .\mujoco_teleop\run.py auto-demo --dataset .\mujoco_teleop\data\scripted_demo_004 --headless --fast
 
 # 完整训练；再次训练时使用一个新的 --output 目录
-.\mujoco_teleop\run.ps1 train-act --dataset .\mujoco_teleop\data\scripted_demo_004 --output .\mujoco_teleop\checkpoints\act_omy_5000 --steps 5000 --batch-size 64
+& $PythonExe .\mujoco_teleop\run.py train-act --dataset .\mujoco_teleop\data\scripted_demo_004 --output .\mujoco_teleop\checkpoints\act_omy_5000 --steps 5000 --batch-size 64
 ```
 
 沿用教程的 ACT 架构、10 步动作块、Adam 1e-4、图像噪声 0.02。输入为单路场景相机与 6 维末端位姿；不使用腕部相机。输出为 10×7 的关节目标和夹爪命令。使用 BF16 混合精度；显存不足时可以减小 `--batch-size`，`--no-amp` 可关闭混合精度。
@@ -167,13 +169,13 @@
 
 ```powershell
 # 当前机器：直接观看已验证成功的 ACT 部署
-.\mujoco_teleop\run.ps1 deploy-act
+& $PythonExe .\mujoco_teleop\run.py deploy-act
 
 # 原教程 10 步配置的时间集成对照（本机没有完成抓放）
-.\mujoco_teleop\run.ps1 deploy-act --checkpoint .\mujoco_teleop\checkpoints\act_omy_5000\final --output .\mujoco_teleop\outputs\act_my_rollout --mode ensemble --ensemble 0.9
+& $PythonExe .\mujoco_teleop\run.py deploy-act --checkpoint .\mujoco_teleop\checkpoints\act_omy_5000\final --output .\mujoco_teleop\outputs\act_my_rollout --mode ensemble --ensemble 0.9
 
 # 每次执行模型预测的 10 步动作块
-.\mujoco_teleop\run.ps1 deploy-act --checkpoint .\mujoco_teleop\checkpoints\act_omy_5000\best --output .\mujoco_teleop\outputs\act_my_chunk_rollout --mode chunk --action-steps 10 --headless --fast
+& $PythonExe .\mujoco_teleop\run.py deploy-act --checkpoint .\mujoco_teleop\checkpoints\act_omy_5000\best --output .\mujoco_teleop\outputs\act_my_chunk_rollout --mode chunk --action-steps 10 --headless --fast
 ```
 
 部署只读取实时图像和末端位姿，动作完全来自加载的 ACT 权重，不回放示教、不使用 IK 控制脚本接管。程序严格加载完整 checkpoint，缺权重即停止，不允许随机初始化伪装为部署成功。
@@ -189,9 +191,9 @@
 在不改变示教数据、输入和 ACT 主体结构的情况下，扩大预测窗口到 100 步，并继承训练权重继续训练 2000 步：
 
 ```powershell
-.\mujoco_teleop\run.ps1 train-act --dataset .\mujoco_teleop\data\scripted_demo_004 --output .\mujoco_teleop\checkpoints\act_omy_chunk100 --steps 2000 --batch-size 32 --chunk-size 100 --learning-rate 0.00005 --init-checkpoint .\mujoco_teleop\checkpoints\act_omy_5000\best
+& $PythonExe .\mujoco_teleop\run.py train-act --dataset .\mujoco_teleop\data\scripted_demo_004 --output .\mujoco_teleop\checkpoints\act_omy_chunk100 --steps 2000 --batch-size 32 --chunk-size 100 --learning-rate 0.00005 --init-checkpoint .\mujoco_teleop\checkpoints\act_omy_5000\best
 
-.\mujoco_teleop\run.ps1 deploy-act --checkpoint .\mujoco_teleop\checkpoints\act_omy_chunk100\final --output .\mujoco_teleop\outputs\act_my_success --mode chunk --action-steps 100
+& $PythonExe .\mujoco_teleop\run.py deploy-act --checkpoint .\mujoco_teleop\checkpoints\act_omy_chunk100\final --output .\mujoco_teleop\outputs\act_my_success --mode chunk --action-steps 100
 ```
 
 共享网络权重严格加载；动作 query 位置嵌入按新长度插值，固定 VAE 位置编码相应扩展。这个工程适配同时增加了训练步数，不是只比较窗口长度的严格消融实验。
@@ -255,7 +257,18 @@ $SmolRun = ".\mujoco_teleop\checkpoints\smol_$RunTag"
 
 首次联网下载固定版本 SmolVLA 权重及骨干配置/分词器，附加依赖仍放 `.deps`。训练严格匹配全部核心预训练参数，按训练回合重新计算归一化。`--steps 5 --log-every 1` 可先做短检查；上游原配置为 20,000 步、batch=16，本机例子是较短练习配置。
 
-部署依次测试红/蓝指令，输出 JSON、逐帧日志、相机图和 GIF。当前 2,000 步基线已经完成训练和严格重新加载，但实际部署 0/2 成功；后续长窗口实验见复现记录。权重、数据和 `.deps` 不随 Git 上传。
+部署依次测试红/蓝指令，输出 JSON、逐帧日志、相机图和 GIF。2,000 步短窗口和续训 3,000 步长窗口模型均没有完成抓放，完整记录保留。权重、数据和 `.deps` 不随 Git 上传。
+
+要先体验已验证能完成任务的 VLA，可运行教程公开 OMY 微调权重：
+
+```powershell
+& $PythonExe .\mujoco_teleop\scripts\prepare_vla.py --tutorial-checkpoint
+& $PythonExe .\mujoco_teleop\run.py deploy-smolvla --checkpoint .\mujoco_teleop\.downloads\models\omy_pnp_smolvla --output ".\mujoco_teleop\outputs\smol_public_$RunTag" --upstream-interface --max-steps 1000
+```
+
+`--upstream-interface` 同时对齐原夹爪映射、积分器和 800×600→256×256 相机流程。本机有窗口、无窗口运行均为红/蓝 **物理成功 2/2**。主要看 `physical_successes`：按第 9 节的 3cm 抬升持续、竖直与任务条件，再稳定 20 帧。`successes` 保留原 ACT 的额外 10cm/0.95m 条件，本次为 0，口径不同。默认按物理规则停止；`--success-rule strict` 可重跑旧规则。
+
+发布模型成功与自己训练成功分别记录，也不能把两个 seed=0 任务当作泛化评估。视频和元数据见 [VLA 记录](docs/VLA_REPRODUCTION_LOG.md)。
 
 ### 9：数据与策略诊断
 

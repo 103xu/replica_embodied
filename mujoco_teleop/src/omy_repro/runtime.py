@@ -5,6 +5,7 @@ import time
 import mujoco
 import glfw
 import numpy as np
+from PIL import Image
 from mujoco_env.y_env import SimpleEnv
 from mujoco_env.y_env2 import SimpleEnv2
 from .assets import ensure_assets
@@ -18,6 +19,7 @@ FPS = 20
 class RuntimeAdapter:
     scene = SCENE
     state_type_name = 'ee_pose'
+    camera_size = (256, 256)
 
     def __init__(self, seed=0, headless=False, action_type='eef_pose'):
         ensure_assets(VENDOR)
@@ -25,7 +27,10 @@ class RuntimeAdapter:
         self.camera_renderer = None
         super().__init__(str(self.scene), seed=seed, action_type=action_type, state_type=self.state_type_name)
         # A direct renderer works for GUI and offscreen tests alike.
-        self.camera_renderer = mujoco.Renderer(self.env.model, height=256, width=256)
+        width, height = self.camera_size
+        self.env.model.vis.global_.offwidth = max(self.env.model.vis.global_.offwidth, width)
+        self.env.model.vis.global_.offheight = max(self.env.model.vis.global_.offheight, height)
+        self.camera_renderer = mujoco.Renderer(self.env.model, height=height, width=width)
         self.substeps = round(1 / FPS / self.env.model.opt.timestep)
         if not np.isclose(self.substeps * self.env.model.opt.timestep, 1 / FPS):
             raise ValueError('Simulation timestep must divide the 20 Hz control period.')
@@ -40,7 +45,10 @@ class RuntimeAdapter:
         frames = []
         for camera in ('agentview', 'egocentric'):
             self.camera_renderer.update_scene(self.env.data, camera=camera)
-            frames.append(self.camera_renderer.render().copy())
+            frame = self.camera_renderer.render().copy()
+            if self.camera_size != (256, 256):
+                frame = np.asarray(Image.fromarray(frame).resize((256, 256))).copy()
+            frames.append(frame)
         return frames
 
     def advance(self):
@@ -121,6 +129,20 @@ class LanguageEnvironment(RuntimeAdapter, SimpleEnv):
     set_obj_pose = SimpleEnv2.set_obj_pose
     render = SimpleEnv2.render
     check_success = SimpleEnv2.check_success
+
+    def get_state(self):
+        return self.get_joint_state()[:6].copy()
+
+
+class UpstreamLanguageEnvironment(RuntimeAdapter, SimpleEnv2):
+    """Original section-5 gripper mapping/integrator for published-model comparison."""
+    scene = VENDOR / 'asset' / 'example_scene_y2.xml'
+    state_type_name = 'joint_angle'
+    camera_size = (800, 600)
+
+    def reset(self, seed=None):
+        self.env.reset()
+        SimpleEnv2.reset(self, seed=seed)
 
     def get_state(self):
         return self.get_joint_state()[:6].copy()

@@ -23,6 +23,7 @@ def main():
         ROOT / 'outputs/language020_blue_targetfixed/replay_report.json': 'language_blue_replay.json',
         ROOT / 'outputs/vla_preflight.json': 'vla_preflight.json',
         ROOT / 'outputs/smolvla_2000_diagnosis.json': 'smolvla_2000_diagnosis.json',
+        ROOT / 'outputs/smolvla_chunk50_diagnosis.json': 'smolvla_chunk50_diagnosis.json',
         ROOT / 'outputs/pi05_source_replay.json': 'pi05_source_replay.json',
         ROOT / 'data/pi05_v3_001/omy_manifest.json': 'pi05_migration.json',
         ROOT / '.downloads/pi05_tests.log': 'pi05_tests.log',

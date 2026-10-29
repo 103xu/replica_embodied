@@ -48,6 +48,8 @@ def parser():
     smoldeploy.add_argument('--max-steps', type=int, default=1000)
     smoldeploy.add_argument('--headless', action='store_true')
     smoldeploy.add_argument('--fast', action='store_true')
+    smoldeploy.add_argument('--upstream-interface', action='store_true', help='Published-model comparison only: original SimpleEnv2 gripper mapping and integrator')
+    smoldeploy.add_argument('--success-rule', choices=['physical', 'strict'], default='physical', help='Stop after 20 stable ticks under section-9 physical rule or legacy 10cm confirmation')
     smoldiagnose = sub.add_parser('diagnose-smolvla', help='Section 9: teacher-forced action error and fixed-noise language contrast')
     smoldiagnose.add_argument('--dataset', type=Path, required=True)
     smoldiagnose.add_argument('--checkpoint', type=Path, required=True)

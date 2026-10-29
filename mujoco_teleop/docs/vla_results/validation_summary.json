@@ -1,0 +1,11 @@
+{
+  "upstream_blobs_verified": 133,
+  "cli_examples_parsed": 50,
+  "local_links_checked": 48,
+  "local_tests": 19,
+  "pi05_interface_tests": 6,
+  "act_regression_successes": 1,
+  "published_smolvla_headless_physical_successes": 2,
+  "published_smolvla_gui_physical_successes": 2,
+  "own_smolvla_task_successes": 0
+}

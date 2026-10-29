@@ -1,0 +1,135 @@
+{
+  "checkpoint": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\checkpoints\\smolvla_chunk50_3000\\final",
+  "samples": [
+    {
+      "frame": 0,
+      "task": "Place the red mug on the plate.",
+      "joint_mae_rad": 0.060304559767246246,
+      "gripper_mae": 0.011842101812362671
+    },
+    {
+      "frame": 672,
+      "task": "Place the blue mug on the plate.",
+      "joint_mae_rad": 0.03489961102604866,
+      "gripper_mae": 0.056656867265701294
+    },
+    {
+      "frame": 1345,
+      "task": "Place the red mug on the plate.",
+      "joint_mae_rad": 0.02654937654733658,
+      "gripper_mae": 0.05947539210319519
+    },
+    {
+      "frame": 2018,
+      "task": "Place the blue mug on the plate.",
+      "joint_mae_rad": 0.04456768184900284,
+      "gripper_mae": 0.017349988222122192
+    },
+    {
+      "frame": 2690,
+      "task": "Place the red mug on the plate.",
+      "joint_mae_rad": 0.02259698137640953,
+      "gripper_mae": 0.013786524534225464
+    },
+    {
+      "frame": 3363,
+      "task": "Place the blue mug on the plate.",
+      "joint_mae_rad": 0.030789336189627647,
+      "gripper_mae": 0.05252748727798462
+    },
+    {
+      "frame": 4036,
+      "task": "Place the red mug on the plate.",
+      "joint_mae_rad": 0.014355550520122051,
+      "gripper_mae": 0.08954423666000366
+    },
+    {
+      "frame": 4708,
+      "task": "Place the blue mug on the plate.",
+      "joint_mae_rad": 0.04981880635023117,
+      "gripper_mae": 0.052151620388031006
+    },
+    {
+      "frame": 5381,
+      "task": "Place the red mug on the plate.",
+      "joint_mae_rad": 0.012337873689830303,
+      "gripper_mae": 0.04350811243057251
+    },
+    {
+      "frame": 6054,
+      "task": "Place the blue mug on the plate.",
+      "joint_mae_rad": 0.03219299763441086,
+      "gripper_mae": 0.04651457071304321
+    },
+    {
+      "frame": 6726,
+      "task": "Place the red mug on the plate.",
+      "joint_mae_rad": 0.02657966874539852,
+      "gripper_mae": 0.048205673694610596
+    },
+    {
+      "frame": 7399,
+      "task": "Place the blue mug on the plate.",
+      "joint_mae_rad": 0.02877524495124817,
+      "gripper_mae": 0.08371931314468384
+    },
+    {
+      "frame": 8072,
+      "task": "Place the red mug on the plate.",
+      "joint_mae_rad": 0.03479420393705368,
+      "gripper_mae": 0.04350811243057251
+    },
+    {
+      "frame": 8744,
+      "task": "Place the blue mug on the plate.",
+      "joint_mae_rad": 0.019779350608587265,
+      "gripper_mae": 0.08973217010498047
+    },
+    {
+      "frame": 9417,
+      "task": "Place the red mug on the plate.",
+      "joint_mae_rad": 0.04829936847090721,
+      "gripper_mae": 0.09707236289978027
+    },
+    {
+      "frame": 10090,
+      "task": "Place the blue mug on the plate.",
+      "joint_mae_rad": 0.02178388461470604,
+      "gripper_mae": 0.037495195865631104
+    },
+    {
+      "frame": 10762,
+      "task": "Place the red mug on the plate.",
+      "joint_mae_rad": 0.04389413446187973,
+      "gripper_mae": 0.039181917905807495
+    },
+    {
+      "frame": 11435,
+      "task": "Place the blue mug on the plate.",
+      "joint_mae_rad": 0.04938427358865738,
+      "gripper_mae": 0.008835643529891968
+    },
+    {
+      "frame": 12108,
+      "task": "Place the blue mug on the plate.",
+      "joint_mae_rad": 0.050296902656555176,
+      "gripper_mae": 0.022928357124328613
+    },
+    {
+      "frame": 12781,
+      "task": "Place the blue mug on the plate.",
+      "joint_mae_rad": 0.05130914971232414,
+      "gripper_mae": 0.006792217493057251
+    }
+  ],
+  "teacher_forced": true,
+  "uses_future_action_input": false,
+  "joint_mae_rad": 0.03516544783487916,
+  "gripper_mae": 0.0460413932800293,
+  "same_scene_text_probe": {
+    "different_tokens": true,
+    "red_blue_mean_action_difference": 0.020008772611618042,
+    "repeated_red_max_difference": 0.0,
+    "proves_task_success": false
+  }
+}

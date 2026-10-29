@@ -1,0 +1,48 @@
+{
+  "checkpoint": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\checkpoints\\smolvla_chunk50_3000\\final",
+  "controller": "SmolVLA neural policy only",
+  "environment_interface": "corrected_OMY_mapping",
+  "camera_pipeline": "native_256x256",
+  "uses_recorded_actions": false,
+  "uses_scripted_controller": false,
+  "uses_language": true,
+  "state_type": "joint_angle",
+  "fps": 20,
+  "successes": 0,
+  "trials": [
+    {
+      "instruction": "Place the red mug on the plate.",
+      "seed": 0,
+      "steps": 1000,
+      "success": false,
+      "stable_frames": 0,
+      "target": "body_obj_mug_5",
+      "target_xy_distance_m": 0.255780898383246,
+      "target_z_distance_m": 0.0367685879155184,
+      "target_up_cosine": 0.9999594840880115,
+      "upright": true,
+      "legacy_success": false,
+      "mug_lift_height_m": 0.023279293088701802,
+      "strict_success": false,
+      "physical_success": false,
+      "mean_action_call_ms": 25.167673899501096
+    },
+    {
+      "instruction": "Place the blue mug on the plate.",
+      "seed": 0,
+      "steps": 1000,
+      "success": false,
+      "stable_frames": 0,
+      "target": "body_obj_mug_6",
+      "target_xy_distance_m": 0.5117063750439834,
+      "target_z_distance_m": 0.0367685879155184,
+      "target_up_cosine": 0.999959484088012,
+      "upright": true,
+      "legacy_success": false,
+      "mug_lift_height_m": 0.0022789851055025068,
+      "strict_success": false,
+      "physical_success": false,
+      "mean_action_call_ms": 11.837625200394541
+    }
+  ]
+}

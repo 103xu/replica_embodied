@@ -8,8 +8,8 @@ PROJECT = Path(__file__).resolve().parents[1]
 runpy.run_path(str(PROJECT / 'run.py'), run_name='bootstrap')
 
 import numpy as np
-from omy_repro.language import load_language, task_status
-from omy_repro.runtime import LanguageEnvironment
+from omy_repro.language import load_language, task_status, physical_candidate
+from omy_repro.runtime import LanguageEnvironment, UpstreamLanguageEnvironment
 from omy_repro.smolvla import Frames
 
 
@@ -53,6 +53,14 @@ class LanguageTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 load_language(folder)
 
+    def test_physical_rule_is_independent_of_old_ten_centimeter_confirmation(self):
+        status = {'legacy_success': True, 'upright': True, 'strict_success': False,
+                  'mug_lift_height_m': 0.058}
+        self.assertTrue(physical_candidate(status, 3))
+        self.assertFalse(physical_candidate(status, 2))
+        self.assertFalse(physical_candidate({**status, 'upright': False}, 3))
+        self.assertFalse(physical_candidate({**status, 'legacy_success': False}, 3))
+
     def test_legacy_success_follows_language_target(self):
         from unittest.mock import patch
         env = self.env
@@ -65,6 +73,18 @@ class LanguageTests(unittest.TestCase):
             self.assertTrue(env.check_success())
             env.set_instruction('Place the blue mug on the plate.')
             self.assertFalse(env.check_success())
+
+    def test_published_model_interface_preserves_original_gripper_command(self):
+        env = UpstreamLanguageEnvironment(seed=0, headless=True, action_type='joint_angle')
+        try:
+            command = env.get_commanded_joint_action()
+            command[-1] = 0.8
+            state = env.snapshot()
+            env.step(command)
+            np.testing.assert_allclose(env.q[-4:], [0.8, 0.64, 0.8, 0.64], atol=1e-6)
+            np.testing.assert_array_equal(state, env.snapshot())
+        finally:
+            env.close()
 
     def test_split_keeps_whole_episodes_and_stats_ignore_holdout(self):
         import torch

@@ -42,6 +42,11 @@ def target_height(env):
     return float(env.env.get_p_body(env.obj_target)[2])
 
 
+def physical_candidate(status, consecutive_lift_ticks):
+    """Section-9 physical rule, distinct from the older 10cm ACT confirmation."""
+    return bool(status['legacy_success'] and status['upright'] and consecutive_lift_ticks >= 3)
+
+
 def collect(args):
     root = (args.dataset or PROJECT / 'data' / 'language_demo').resolve()
     if root.exists():
@@ -211,7 +216,7 @@ def audit(args):
             result = {'episode': episode, 'instruction': env.instruction, 'frames': len(rows),
                       'max_next_joint_state_error_rad': max(errors, default=0), 'lift_ticks_above_3cm': int(lift_ticks),
                       'max_consecutive_lift_ticks': int(max_lift_run),
-                      **status, 'physical_success': status['legacy_success'] and status['upright'] and max_lift_run >= 3}
+                      **status, 'physical_success': physical_candidate(status, max_lift_run)}
             results.append(result)
             print('AUDIT_EPISODE ' + json.dumps(result), flush=True)
         report = {'dataset': str(root), 'uses_learned_policy': False, 'episodes': results,
