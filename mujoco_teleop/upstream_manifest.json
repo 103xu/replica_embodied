@@ -362,6 +362,16 @@
       "path": "env_config.py",
       "sha": "04789299afd0c8f43a057b0077fc5ac3fc880c5b",
       "size": 1445
+    },
+    {
+      "path": "3.train.ipynb",
+      "size": 228602,
+      "sha": "972c91df5de5a9a47af11cf90a4a3662c6420f11"
+    },
+    {
+      "path": "4.deploy.ipynb",
+      "size": 27294,
+      "sha": "a5829e2aa0aee1e5bbe99f77930cb531bc3cb5ad"
     }
   ]
 }

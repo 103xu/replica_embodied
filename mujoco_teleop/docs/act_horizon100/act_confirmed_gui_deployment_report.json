@@ -1,0 +1,46 @@
+{
+  "checkpoint": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\checkpoints\\act_omy_chunk100\\final",
+  "controller": "ACT neural policy only",
+  "mode": "chunk",
+  "ensemble": null,
+  "action_steps": 100,
+  "fps": 20,
+  "max_steps": 1000,
+  "confirmation": {
+    "stable_frames": 20,
+    "max_gripper_command": 0.1,
+    "min_ee_height_m": 0.95,
+    "min_mug_lift_m": 0.1
+  },
+  "task_successes": 0,
+  "grasp_successes": 0,
+  "trials": [
+    {
+      "trial": 0,
+      "seed": 0,
+      "steps": 1000,
+      "task_predicate_success": false,
+      "grasp_and_place_success": false,
+      "first_upstream_predicate_step": null,
+      "stable_success_frames": 0,
+      "applied_gripper_command": 0.15279507637023926,
+      "mug_lift_height_m": 0.015014893254115536,
+      "mean_policy_latency_ms": 14.494377399765654,
+      "final_success_debug": {
+        "xy_dist": 0.23976383615932573,
+        "z_dist": 0.02458423021873657,
+        "ee_z": 1.0157450096188194,
+        "gripper_open_norm": 0.8471852980159131,
+        "success_xy_threshold": 0.1,
+        "success_z_threshold": 0.12,
+        "success_ee_height_threshold": 0.9,
+        "success_gripper_open_norm_threshold": 0.3,
+        "success_require_gripper_open": true,
+        "success": false
+      }
+    }
+  ],
+  "same_seed_as_training": true,
+  "uses_recorded_actions": false,
+  "uses_scripted_controller": false
+}

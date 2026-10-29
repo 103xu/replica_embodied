@@ -1,0 +1,12 @@
+test_chunks_do_not_cross_episode_boundaries (__main__.ACTTests) ... ok
+test_inference_ignores_ground_truth_future_actions (__main__.ACTTests) ... ok
+Loading weights from local directory
+test_longer_chunks_preserve_trained_nonpositional_weights (__main__.ACTTests) ... ok
+test_missing_weights_cannot_fall_back_to_random_initialization (__main__.ACTTests) ... ok
+Loading weights from local directory
+test_trained_checkpoint_roundtrip_keeps_predictions (__main__.ACTTests) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 1.251s
+
+OK

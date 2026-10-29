@@ -1,8 +1,8 @@
-# OMY 示教采集与数据回放（Every-Embodied 第 1、2 部分）
+# OMY 示教采集、回放与 ACT 训练部署（Every-Embodied 第 1～4 部分）
 
 在 Windows 上复现 OMY 六轴机械臂的键盘示教采集和动作回放。使用教程原始机械臂、杯子、盘子、场景与逆运动学代码；提供独立 Python/PowerShell 入口，避免 Notebook 的工作目录、Windows 多进程和误删数据问题。
 
-本项目范围：第 1 部分采集示教、第 2 部分回放数据。**不包含 ACT / SmolVLA 训练、模型权重或真机控制。**
+本项目范围：第 1 部分采集示教、第 2 部分回放数据、第 3 部分 ACT 训练、第 4 部分 ACT 仿真部署。**不包含 SmolVLA 训练或真机控制。** ACT 是视觉模仿学习策略，本实验不加入语言理解。
 
 另提供 `auto-demo`：以确定性 IK 脚本执行一次抓杯、抬升、搬运、放下，再保存实际仿真轨迹，方便无需手工操作就验证第 1、2 部分。它不是训练出来的 VLA 策略，也不是人类键盘示教。
 
@@ -14,10 +14,11 @@
 - 来源文件清单、大小与 Git blob SHA-1：[`upstream_manifest.json`](upstream_manifest.json)。
 - 原始 Notebook、环境代码与模型资源保存在 [`vendor/every_embodied/`](vendor/every_embodied/)。上游代码保持原样，本地适配集中在 `src/omy_repro/`。
 - 复现操作记录见 [`docs/REPRODUCTION_LOG.md`](docs/REPRODUCTION_LOG.md)，第三方来源与授权见 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)。
+- 第 3、4 部分独立记录见 [`docs/ACT_REPRODUCTION_LOG.md`](docs/ACT_REPRODUCTION_LOG.md)。
 
 ## 当前机器的环境选择
 
-使用已有 `my_env` 的 Python 3.10，不使用 base 的 Python 3.14。检测到 NVIDIA RTX 5060 Laptop GPU（约 8 GB 显存），保留已有 PyTorch `2.14.0+cu130` 与 torchvision `0.29.0+cu130`。本章不需要 GPU 训练。
+使用已有 `my_env` 的 Python 3.10，不使用 base 的 Python 3.14。检测到 NVIDIA RTX 5060 Laptop GPU（约 8 GB 显存），保留已有 PyTorch `2.14.0+cu130` 与 torchvision `0.29.0+cu130`。第 1、2 部分不需要 GPU 训练；第 3、4 部分默认使用 CUDA。
 
 旧版 LeRobot 需要旧版 `datasets/fsspec`。为保留用户环境，新增依赖安装在本项目 `.deps/` 中，由 `run.py` 启动时加载。**没有新建虚拟环境，也不把项目依赖安装进 base/my_env 的 site-packages。** 普通终端直接 `import mujoco` 不会加载 `.deps`，请使用下述入口。
 
@@ -128,6 +129,86 @@
 
 `--headless` 指不打开主窗口，仍会渲染相机图像；当前适配依赖上游的 GLFW/显示器检测，不保证可在完全没有显示服务的 Linux 服务器运行。
 
+## 第 3 部分：训练 ACT
+
+在已有第 1、2 部分环境上，先补齐 ACT 附加依赖并缓存官方 ResNet18 初始化权重：
+
+```powershell
+& "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe" .\mujoco_teleop\scripts\prepare_act.py
+```
+
+首次运行需要网络下载 torchvision 官方骨干网络权重，后续训练和部署读取本地缓存。没有替换已有 PyTorch，也不需要在 base 里安装包。
+
+```powershell
+# 新克隆或本机没有数据时，先执行此命令生成训练示教；已有同名目录则跳过
+.\mujoco_teleop\run.ps1 auto-demo --dataset .\mujoco_teleop\data\scripted_demo_004 --headless --fast
+
+# 完整训练；再次训练时使用一个新的 --output 目录
+.\mujoco_teleop\run.ps1 train-act --dataset .\mujoco_teleop\data\scripted_demo_004 --output .\mujoco_teleop\checkpoints\act_omy_5000 --steps 5000 --batch-size 64
+```
+
+沿用教程的 ACT 架构、10 步动作块、Adam 1e-4、图像噪声 0.02。输入为单路场景相机与 6 维末端位姿；不使用腕部相机。输出为 10×7 的关节目标和夹爪命令。使用 BF16 混合精度；显存不足时可以减小 `--batch-size`，`--no-amp` 可关闭混合精度。
+
+输出目录保留：
+
+- `training_run.json`：数据哈希、实际配置、步数、显存峰值、耗时和离线指标。
+- `metrics.jsonl`、`training_loss.png`：每步 loss 和训练曲线。
+- `offline_actions.npz/png`：离线动作预测与示教标签的对比。
+- `best/config.json`、`best/model.safetensors`：按离线 MAE 选择的 checkpoint。
+- `final/`：第 5000 步的最终 checkpoint。
+
+**只有一个训练回合，当前任务属于单场景拟合。** 离线评估只传入当前观测，明确排除真值未来动作；MAE 降低不能代替真实闭环抓放成功。7 维总体 MAE 混合关节弧度与夹爪单位，判断精度时应查看报告中的分维度指标。
+
+## 第 4 部分：部署训练好的 ACT
+
+```powershell
+# 当前机器：直接观看已验证成功的 ACT 部署
+.\mujoco_teleop\run.ps1 deploy-act
+
+# 原教程 10 步配置的时间集成对照（本机没有完成抓放）
+.\mujoco_teleop\run.ps1 deploy-act --checkpoint .\mujoco_teleop\checkpoints\act_omy_5000\final --output .\mujoco_teleop\outputs\act_my_rollout --mode ensemble --ensemble 0.9
+
+# 每次执行模型预测的 10 步动作块
+.\mujoco_teleop\run.ps1 deploy-act --checkpoint .\mujoco_teleop\checkpoints\act_omy_5000\best --output .\mujoco_teleop\outputs\act_my_chunk_rollout --mode chunk --action-steps 10 --headless --fast
+```
+
+部署只读取实时图像和末端位姿，动作完全来自加载的 ACT 权重，不回放示教、不使用 IK 控制脚本接管。程序严格加载完整 checkpoint，缺权重即停止，不允许随机初始化伪装为部署成功。
+
+输出目录已有时拒绝覆盖。部署最多执行 `--max-steps` 帧（默认 1200）；`--trials N` 依次使用 `seed` 到 `seed+N-1`。每个 trial 会清空策略动作队列/时间集成状态。
+
+`deployment_report.json` 分别记录上游任务判定与更严格的抓放确认：实际抬升超过 10 厘米、夹爪命令不超过 0.1、末端高度至少 0.95 m，并在盘上连续保持 20 帧。逐帧动作、状态和图片保存在相同目录。默认 seed=0 与训练示教相同；不同种子不保证成功，不能把同种子结果当作泛化评测。
+
+### 本机结果与成功配置
+
+原教程的 10 步模型完成了 5000 步训练，但 best/final 在时间集成和动作块模式都停在杯子上方，未完成抓放。完整负结果保存在 [`docs/act_baseline/`](docs/act_baseline/)。
+
+在不改变示教数据、输入和 ACT 主体结构的情况下，扩大预测窗口到 100 步，并继承训练权重继续训练 2000 步：
+
+```powershell
+.\mujoco_teleop\run.ps1 train-act --dataset .\mujoco_teleop\data\scripted_demo_004 --output .\mujoco_teleop\checkpoints\act_omy_chunk100 --steps 2000 --batch-size 32 --chunk-size 100 --learning-rate 0.00005 --init-checkpoint .\mujoco_teleop\checkpoints\act_omy_5000\best
+
+.\mujoco_teleop\run.ps1 deploy-act --checkpoint .\mujoco_teleop\checkpoints\act_omy_chunk100\final --output .\mujoco_teleop\outputs\act_my_success --mode chunk --action-steps 100
+```
+
+共享网络权重严格加载；动作 query 位置嵌入按新长度插值，固定 VAE 位置编码相应扩展。这个工程适配同时增加了训练步数，不是只比较窗口长度的严格消融实验。
+
+当前 `deploy-act` 默认加载 **`act_omy_chunk100/final`**，按 checkpoint 中的动作步数执行。100 步动作块意味着每 5 秒仿真重新查询一次模型，中间以 20 Hz 执行模型已预测的动作。`select_action` 的耗时统计包含缓存动作和首次 CUDA 初始化，不能当作纯模型单次推理延迟。
+
+本机 seed=0 的验证结果：
+
+| 验证 | 完成帧数 | 杯子最大抬升 | 松爪后连续保持 | 严格抓放确认 |
+| --- | --- | --- | --- | --- |
+| 无主窗口 | 586 | 21.03 cm | 20 帧 | 通过 |
+| 有窗口 | 572 | 21.23 cm | 20 帧 | 通过 |
+
+两次均使用 ACT 神经网络控制，没有示教回放或 IK 接管。长窗口的 `best` 虽然离线误差更低，却没有通过抓放，因此默认使用实际验证通过的 `final`。这些是同一训练场景的两次运行，不能解释为跨场景成功率。
+
+![ACT 独立控制的最终抓放结果](docs/act_horizon100/act_confirmed_gui_fixed_trial_000_agent.png)
+
+详细训练、失败对照、OpenGL 上下文修正和验证过程见 [`ACT_REPRODUCTION_LOG.md`](docs/ACT_REPRODUCTION_LOG.md)。
+
+训练权重约 206 MB，留在本机 `checkpoints/`，不直接提交到 GitHub；新机器需要先训练或复制完整 checkpoint 目录再部署。
+
 ## 新机器安装 / 恢复依赖
 
 需要 Python 3.10 和可用的 PyTorch / torchvision。现有机器的 GPU 版 PyTorch 沿用用户环境，不在本章安装脚本中替换。安装脚本优先读取实际安装后生成的 `requirements-lock.txt`；`requirements.txt` 说明直接依赖，LeRobot 另外按固定提交安装。
@@ -150,6 +231,8 @@
 
 ```powershell
 & "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe" .\mujoco_teleop\tests\test_reproduction.py
+& "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe" .\mujoco_teleop\tests\test_act.py
+& "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe" .\mujoco_teleop\tests\test_rendering.py
 ```
 
 检查现存数据保护、动作标签语义、完整积分状态恢复、IK 的物理副作用以及 Parquet 图像/动作的保存与读取。
@@ -175,5 +258,7 @@ mujoco_teleop/
 ```
 
 本次工作在 `codex/omy-collection-replay` 分支开发，并按用户要求上传到 `103xu/replica_embodied`。较大的示教、运行缓存不进入 Git，源码和必要模型资源保留在本仓库中。原有 `mujoco_demo/` 保持原样。
+
+第 3、4 部分在 `codex/act-training-deployment` 分支继续开发。采集/回放、ACT 和 GUI 相机一致性共 11 项检查通过；实际部署结果单独记录，不以单元测试通过替代抓放成功判定。
 
 盘子的原始 OBJ 网格较大，因此 Git 保留上游的 `plate_11.zip`，解压目录通过 `.gitignore` 排除；当前本机保留解压后的完整模型，首次从 Git 克隆运行时会自动离线解压，不需要重新下载。这样避免直接提交大型原始网格。

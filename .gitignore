@@ -11,5 +11,6 @@ mujoco_teleop/.deps/
 mujoco_teleop/.downloads/
 mujoco_teleop/data/
 mujoco_teleop/outputs/
+mujoco_teleop/checkpoints/
 # Plate OBJ is large: track the original ZIP and extract locally on first run.
 mujoco_teleop/vendor/every_embodied/asset/objaverse/plate_11/

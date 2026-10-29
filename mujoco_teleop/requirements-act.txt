@@ -1,0 +1,3 @@
+# Additions for ACT sections 3-4; install with --no-deps into project .deps.
+safetensors==0.5.3
+imageio==2.37.0

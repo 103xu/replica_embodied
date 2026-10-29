@@ -1,0 +1,37 @@
+{
+  "checkpoint": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\checkpoints\\act_omy_chunk100\\final",
+  "controller": "ACT neural policy only",
+  "mode": "chunk",
+  "ensemble": null,
+  "action_steps": 100,
+  "fps": 20,
+  "max_steps": 1000,
+  "task_successes": 1,
+  "grasp_successes": 1,
+  "trials": [
+    {
+      "trial": 0,
+      "seed": 0,
+      "steps": 481,
+      "task_predicate_success": true,
+      "grasp_and_place_success": true,
+      "mug_lift_height_m": 0.20392480103276067,
+      "mean_policy_latency_ms": 28.457786694746037,
+      "final_success_debug": {
+        "xy_dist": 0.0184202963912181,
+        "z_dist": 0.04964630380704382,
+        "ee_z": 0.9076489594729549,
+        "gripper_open_norm": 0.3190198817225579,
+        "success_xy_threshold": 0.1,
+        "success_z_threshold": 0.12,
+        "success_ee_height_threshold": 0.9,
+        "success_gripper_open_norm_threshold": 0.3,
+        "success_require_gripper_open": true,
+        "success": true
+      }
+    }
+  ],
+  "same_seed_as_training": true,
+  "uses_recorded_actions": false,
+  "uses_scripted_controller": false
+}

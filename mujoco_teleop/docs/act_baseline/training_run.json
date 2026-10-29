@@ -1,0 +1,57 @@
+{
+  "dataset": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\data\\scripted_demo_004",
+  "dataset_sha256": "a0993a997081590b001bd33363913d6a1da53dabee6df8811c2700b9636ef3b1",
+  "episodes": 1,
+  "frames": 602,
+  "training_steps": 5000,
+  "batch_size": 64,
+  "chunk_size": 10,
+  "learning_rate": 0.0001,
+  "noise_std": 0.02,
+  "seed": 0,
+  "device": "cuda",
+  "torch": "2.14.0+cu130",
+  "parameters": 51552181,
+  "single_episode_overfit": true,
+  "held_out_episodes": [],
+  "normalization": "training dataset statistics",
+  "amp_bfloat16": true,
+  "elapsed_seconds": 1005.4884441999893,
+  "before": {
+    "teacher_forced": true,
+    "future_action_input": false,
+    "frames": 602,
+    "mae": 0.3649675250053406,
+    "joint_mae_rad": 0.3556864857673645,
+    "gripper_mae": 0.42065536975860596,
+    "per_dimension_mae": [
+      0.4551599323749542,
+      0.137637659907341,
+      0.6299446821212769,
+      0.45269131660461426,
+      0.0002697973686736077,
+      0.4584137797355652,
+      0.42065536975860596
+    ]
+  },
+  "after": {
+    "teacher_forced": true,
+    "future_action_input": false,
+    "frames": 602,
+    "mae": 0.004913868848234415,
+    "joint_mae_rad": 0.004938348662108183,
+    "gripper_mae": 0.004767002072185278,
+    "per_dimension_mae": [
+      0.0031650171149522066,
+      0.003300256794318557,
+      0.009998881258070469,
+      0.00934690609574318,
+      8.03791408543475e-06,
+      0.003810981521382928,
+      0.004767002072185278
+    ]
+  },
+  "best_mae": 0.004556258674710989,
+  "complete": true,
+  "peak_cuda_memory_mib": 2878.84326171875
+}

@@ -34,4 +34,11 @@ image writing, safe dataset directory handling, explicit initial-state snapshots
 complete integration-state restoration after IK, consistent float32 command
 execution/recording, and separate interface-smoke, keyboard demonstration,
 and scripted IK demonstration modes.
+
+Sections 3-4 additionally use the pinned LeRobot ACT policy (Apache-2.0,
+Tony Z. Zhao and the Hugging Face team). The training initialization uses
+the official torchvision ResNet18 ImageNet weights from
+<https://download.pytorch.org/models/resnet18-f37072fd.pth>.
+The local ACT implementation wraps that policy; it does not replace the
+underlying ACT network with a different controller.
 The original vendor sources are retained without local edits.

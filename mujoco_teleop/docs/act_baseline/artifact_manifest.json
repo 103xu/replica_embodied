@@ -1,0 +1,25 @@
+{
+  "training_run": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\checkpoints\\act_omy_5000",
+  "files": {
+    "best/config.json": {
+      "bytes": 1380,
+      "sha256": "90f4abeda533246553d473d198405243c34dc71b179f84cdb3dc8458d1237208"
+    },
+    "best/model.safetensors": {
+      "bytes": 206336252,
+      "sha256": "705e88047ded31859b7a55c1851f34a2466cd8aafab9d24323f9dcee48aa2de9"
+    },
+    "best/evaluation.json": {
+      "bytes": 435,
+      "sha256": "deb2f4d2bb39ad9e9229c987240c82e31657b1dfb2c84d57c9b2651491147560"
+    },
+    "final/config.json": {
+      "bytes": 1380,
+      "sha256": "90f4abeda533246553d473d198405243c34dc71b179f84cdb3dc8458d1237208"
+    },
+    "final/model.safetensors": {
+      "bytes": 206336252,
+      "sha256": "320e8599779c8a436f8aff925b4e0b2ced408f2028be7b2e578883aaa1d5868b"
+    }
+  }
+}

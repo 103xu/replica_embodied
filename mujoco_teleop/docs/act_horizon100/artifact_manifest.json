@@ -1,0 +1,25 @@
+{
+  "training_run": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\checkpoints\\act_omy_chunk100",
+  "files": {
+    "best/config.json": {
+      "bytes": 1354,
+      "sha256": "d30d0c81ee91db9304587e996c5c47392c18dd5e81e1fcd1a8045418b2c42456"
+    },
+    "best/model.safetensors": {
+      "bytes": 206704900,
+      "sha256": "b1220750e546427e04717c6f0ceba03fd0d64d4d6e083c49fc3091e188fd8b78"
+    },
+    "best/evaluation.json": {
+      "bytes": 433,
+      "sha256": "2f3e79901f373006f972b9d46be06505149fd148274cd8bd565feee7ddcee726"
+    },
+    "final/config.json": {
+      "bytes": 1354,
+      "sha256": "d30d0c81ee91db9304587e996c5c47392c18dd5e81e1fcd1a8045418b2c42456"
+    },
+    "final/model.safetensors": {
+      "bytes": 206704900,
+      "sha256": "cb258cda93bb0f9a554c0af525e4cffe04ed1b2aca648c23811f7e096dfeca29"
+    }
+  }
+}

@@ -3,6 +3,7 @@ from pathlib import Path
 import time
 
 import mujoco
+import glfw
 import numpy as np
 from mujoco_env.y_env import SimpleEnv
 from .assets import ensure_assets
@@ -79,6 +80,10 @@ class OMYEnvironment(SimpleEnv):
 
     def show(self, agent, wrist):
         if not self.headless:
+            # Camera Renderer owns a different OpenGL context. The upstream
+            # viewer switches only during construction; rendering in the wrong
+            # context corrupts subsequent policy camera images.
+            glfw.make_context_current(self.env.viewer.window)
             self.rgb_agent, self.rgb_ego = agent, wrist
             self.rgb_side = agent
             self.render(teleop=True)
@@ -88,6 +93,7 @@ class OMYEnvironment(SimpleEnv):
             self.camera_renderer.close()
             self.camera_renderer = None
         if not self.headless:
+            glfw.make_context_current(self.env.viewer.window)
             self.env.close_viewer()
 
 

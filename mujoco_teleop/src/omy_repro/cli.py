@@ -32,6 +32,34 @@ def parser():
     replay.add_argument('--headless', action='store_true')
     replay.add_argument('--fast', action='store_true')
     replay.add_argument('--output', type=Path, default=None)
+    training = sub.add_parser('train-act', help='Section 3: train the pinned LeRobot ACT policy')
+    training.add_argument('--dataset', type=Path, default=None)
+    training.add_argument('--output', type=Path, default=None)
+    training.add_argument('--steps', type=int, default=5000)
+    training.add_argument('--batch-size', type=int, default=16)
+    training.add_argument('--chunk-size', type=int, default=10)
+    training.add_argument('--learning-rate', type=float, default=1e-4)
+    training.add_argument('--noise-std', type=float, default=0.02)
+    training.add_argument('--seed', type=int, default=0)
+    training.add_argument('--device', choices=['cuda', 'cpu'], default='cuda')
+    training.add_argument('--amp', action=argparse.BooleanOptionalAction, default=True)
+    training.add_argument('--no-pretrained-backbone', action='store_true')
+    training.add_argument('--log-every', type=int, default=50)
+    training.add_argument('--eval-every', type=int, default=250)
+    training.add_argument('--init-checkpoint', type=Path, default=None, help='Initialize from a trained ACT checkpoint')
+    deployment = sub.add_parser('deploy-act', help='Section 4: run a trained ACT model in closed-loop MuJoCo')
+    deployment.add_argument('--checkpoint', type=Path, default=None)
+    deployment.add_argument('--output', type=Path, default=None)
+    deployment.add_argument('--device', choices=['cuda', 'cpu'], default='cuda')
+    deployment.add_argument('--seed', type=int, default=0)
+    deployment.add_argument('--trials', type=int, default=1)
+    deployment.add_argument('--max-steps', type=int, default=1200)
+    deployment.add_argument('--mode', choices=['ensemble', 'chunk'], default='chunk')
+    deployment.add_argument('--ensemble', type=float, default=0.9)
+    deployment.add_argument('--action-steps', type=int, default=None)
+    deployment.add_argument('--headless', action='store_true')
+    deployment.add_argument('--fast', action='store_true')
+    deployment.add_argument('--success-stable-frames', type=int, default=20)
     return p
 
 
@@ -262,3 +290,9 @@ def main():
         replay(args)
     elif args.command == 'auto-demo':
         scripted_collect(args)
+    elif args.command == 'train-act':
+        from .act import train
+        train(args)
+    elif args.command == 'deploy-act':
+        from .deploy_act import deploy
+        deploy(args)
