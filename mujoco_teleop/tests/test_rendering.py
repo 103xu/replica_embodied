@@ -18,8 +18,12 @@ class RenderingTests(unittest.TestCase):
             before = environment.images()
             environment.show(*before)
             after = environment.images()
-            np.testing.assert_array_equal(before[0], after[0])
-            np.testing.assert_array_equal(before[1], after[1])
+            for original, rendered in zip(before, after):
+                # Context switches can round a few MSAA pixels by one uint8
+                # level on this driver. Large corruption must still fail.
+                difference = np.abs(original.astype(np.int16) - rendered.astype(np.int16))
+                self.assertLessEqual(int(difference.max()), 1)
+                self.assertLess(np.count_nonzero(difference) / difference.size, 0.001)
             np.testing.assert_array_equal(environment.snapshot(), state)
         finally:
             environment.close()

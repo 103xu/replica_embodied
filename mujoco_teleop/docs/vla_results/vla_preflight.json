@@ -1,0 +1,48 @@
+{
+  "scope": "configuration and model access only; not training success",
+  "policies": [
+    {
+      "policy": "pi0",
+      "chunk_size": 5,
+      "batch_size": 16,
+      "steps": 20000,
+      "configuration_parses": true,
+      "training_verified": false
+    },
+    {
+      "policy": "smolvla",
+      "chunk_size": 5,
+      "batch_size": 16,
+      "steps": 20000,
+      "configuration_parses": true,
+      "training_verified": false
+    }
+  ],
+  "gpu_total_gib": 7.93304443359375,
+  "pi05_upstream_short_check_peak_gib": 12.85,
+  "pi05_full_training_locally_verified": false,
+  "model_access": [
+    {
+      "repo_id": "lerobot/pi0",
+      "revision": "e4ed526af508e58f6008b29e9e48f1098278fdb5",
+      "gated": false,
+      "weight_bytes": 14005623256,
+      "anonymous_config_http_status": 200
+    },
+    {
+      "repo_id": "google/paligemma-3b-pt-224",
+      "revision": "35e4f46485b4d07967e7e9935bc3786aad50687c",
+      "gated": "manual",
+      "weight_bytes": 11693947376,
+      "anonymous_config_http_status": 401,
+      "config_access_error": "HTTPError"
+    },
+    {
+      "repo_id": "lerobot/pi05_base",
+      "revision": "22c30e5b34f9e7ab738b1b34fc2fc5ecfe2d28f0",
+      "gated": false,
+      "weight_bytes": 14467165872,
+      "anonymous_config_http_status": 200
+    }
+  ]
+}

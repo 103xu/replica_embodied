@@ -6,6 +6,7 @@ import mujoco
 import glfw
 import numpy as np
 from mujoco_env.y_env import SimpleEnv
+from mujoco_env.y_env2 import SimpleEnv2
 from .assets import ensure_assets
 
 PROJECT = Path(__file__).resolve().parents[2]
@@ -14,12 +15,15 @@ SCENE = VENDOR / 'asset' / 'example_scene_y.xml'
 FPS = 20
 
 
-class OMYEnvironment(SimpleEnv):
+class RuntimeAdapter:
+    scene = SCENE
+    state_type_name = 'ee_pose'
+
     def __init__(self, seed=0, headless=False, action_type='eef_pose'):
         ensure_assets(VENDOR)
         self.headless = headless
         self.camera_renderer = None
-        super().__init__(str(SCENE), seed=seed, action_type=action_type, state_type='ee_pose')
+        super().__init__(str(self.scene), seed=seed, action_type=action_type, state_type=self.state_type_name)
         # A direct renderer works for GUI and offscreen tests alike.
         self.camera_renderer = mujoco.Renderer(self.env.model, height=256, width=256)
         self.substeps = round(1 / FPS / self.env.model.opt.timestep)
@@ -34,7 +38,7 @@ class OMYEnvironment(SimpleEnv):
 
     def images(self):
         frames = []
-        for camera in (self.agent_cam_name, self.wrist_cam_name):
+        for camera in ('agentview', 'egocentric'):
             self.camera_renderer.update_scene(self.env.data, camera=camera)
             frames.append(self.camera_renderer.render().copy())
         return frames
@@ -95,6 +99,31 @@ class OMYEnvironment(SimpleEnv):
         if not self.headless:
             glfw.make_context_current(self.env.viewer.window)
             self.env.close_viewer()
+
+
+class OMYEnvironment(RuntimeAdapter, SimpleEnv):
+    """Sections 1-4: single cup, six-dimensional end-effector state."""
+
+
+class LanguageEnvironment(RuntimeAdapter, SimpleEnv):
+    """Sections 5-8: two cups, six-dimensional joint state."""
+    scene = VENDOR / 'asset' / 'example_scene_y2.xml'
+    state_type_name = 'joint_angle'
+    # Use the upstream language scene/reset and labels, with the corrected OMY
+    # joint/gripper command mapping already used by sections 1-4.
+    def reset(self, seed=None):
+        # Remove previous-episode velocities, controls and simulation time.
+        self.env.reset()
+        SimpleEnv2.reset(self, seed=seed)
+
+    set_instruction = SimpleEnv2.set_instruction
+    get_obj_pose = SimpleEnv2.get_obj_pose
+    set_obj_pose = SimpleEnv2.set_obj_pose
+    render = SimpleEnv2.render
+    check_success = SimpleEnv2.check_success
+
+    def get_state(self):
+        return self.get_joint_state()[:6].copy()
 
 
 def pace(start, fast):

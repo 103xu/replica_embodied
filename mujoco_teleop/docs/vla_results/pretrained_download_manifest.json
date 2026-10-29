@@ -1,0 +1,116 @@
+[
+  {
+    "repo_id": "lerobot/smolvla_base",
+    "revision": "5e8d12a6e2975b0e5e5fce7c8caf47c371d257b6",
+    "files": [
+      {
+        "path": "config.json",
+        "bytes": 2299,
+        "lfs": null
+      },
+      {
+        "path": "model.safetensors",
+        "bytes": 906712520,
+        "lfs": {
+          "size": 906712520,
+          "sha256": "7cd549ac2351fb069c0ddb3c34ad2d09cfc92b56a15dccdfc2e41467aaca01eb",
+          "pointer_size": 134
+        },
+        "verified_sha256": "7cd549ac2351fb069c0ddb3c34ad2d09cfc92b56a15dccdfc2e41467aaca01eb"
+      },
+      {
+        "path": "policy_postprocessor.json",
+        "bytes": 660,
+        "lfs": null
+      },
+      {
+        "path": "policy_postprocessor_step_0_unnormalizer_processor.safetensors",
+        "bytes": 640,
+        "lfs": {
+          "size": 640,
+          "sha256": "490ab239d96e263687c0b2e386a0afbc235a2eceb9857c36ed32f2f162a3e7c8",
+          "pointer_size": 128
+        },
+        "verified_sha256": "490ab239d96e263687c0b2e386a0afbc235a2eceb9857c36ed32f2f162a3e7c8"
+      },
+      {
+        "path": "policy_preprocessor.json",
+        "bytes": 1872,
+        "lfs": null
+      },
+      {
+        "path": "policy_preprocessor_step_5_normalizer_processor.safetensors",
+        "bytes": 640,
+        "lfs": {
+          "size": 640,
+          "sha256": "490ab239d96e263687c0b2e386a0afbc235a2eceb9857c36ed32f2f162a3e7c8",
+          "pointer_size": 128
+        },
+        "verified_sha256": "490ab239d96e263687c0b2e386a0afbc235a2eceb9857c36ed32f2f162a3e7c8"
+      }
+    ],
+    "local_dir": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\.downloads\\models\\smolvla_base"
+  },
+  {
+    "repo_id": "HuggingFaceTB/SmolVLM2-500M-Video-Instruct",
+    "revision": "7b375e1b73b11138ff12fe22c8f2822d8fe03467",
+    "files": [
+      {
+        "path": "added_tokens.json",
+        "bytes": 4739,
+        "lfs": null
+      },
+      {
+        "path": "chat_template.json",
+        "bytes": 430,
+        "lfs": null
+      },
+      {
+        "path": "config.json",
+        "bytes": 3767,
+        "lfs": null
+      },
+      {
+        "path": "generation_config.json",
+        "bytes": 136,
+        "lfs": null
+      },
+      {
+        "path": "merges.txt",
+        "bytes": 466391,
+        "lfs": null
+      },
+      {
+        "path": "preprocessor_config.json",
+        "bytes": 599,
+        "lfs": null
+      },
+      {
+        "path": "processor_config.json",
+        "bytes": 67,
+        "lfs": null
+      },
+      {
+        "path": "special_tokens_map.json",
+        "bytes": 868,
+        "lfs": null
+      },
+      {
+        "path": "tokenizer.json",
+        "bytes": 3548256,
+        "lfs": null
+      },
+      {
+        "path": "tokenizer_config.json",
+        "bytes": 28626,
+        "lfs": null
+      },
+      {
+        "path": "vocab.json",
+        "bytes": 800662,
+        "lfs": null
+      }
+    ],
+    "local_dir": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\.downloads\\models\\SmolVLM2-500M-Video-Instruct"
+  }
+]

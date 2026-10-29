@@ -1,0 +1,411 @@
+test_chunks_do_not_cross_episode_boundaries (test_act.ACTTests) ... ok
+test_inference_ignores_ground_truth_future_actions (test_act.ACTTests) ... ok
+Loading weights from local directory
+test_longer_chunks_preserve_trained_nonpositional_weights (test_act.ACTTests) ... ok
+test_missing_weights_cannot_fall_back_to_random_initialization (test_act.ACTTests) ... ok
+Loading weights from local directory
+test_trained_checkpoint_roundtrip_keeps_predictions (test_act.ACTTests) ... ok
+
+-----------------------------------------------------------------------------
+name:[Tabletop] dt:[0.002] HZ:[500]
+ n_qpos:[31] n_qvel:[28] n_qacc:[28] n_ctrl:[10]
+ integrator:[IMPLICITFAST]
+
+n_body:[23]
+ [0/23] [world] mass:[0.00]kg
+ [1/23] [front_object_table] mass:[1.00]kg
+ [2/23] [camera] mass:[0.00]kg
+ [3/23] [camera2] mass:[0.00]kg
+ [4/23] [camera3] mass:[0.00]kg
+ [5/23] [link1] mass:[2.06]kg
+ [6/23] [link2] mass:[3.68]kg
+ [7/23] [link3] mass:[2.39]kg
+ [8/23] [link4] mass:[1.40]kg
+ [9/23] [link5] mass:[1.40]kg
+ [10/23] [link6] mass:[0.65]kg
+ [11/23] [camera_center] mass:[0.00]kg
+ [12/23] [tcp_link] mass:[0.32]kg
+ [13/23] [rh_p12_rn_r1] mass:[0.07]kg
+ [14/23] [rh_p12_rn_r2] mass:[0.02]kg
+ [15/23] [rh_p12_rn_l1] mass:[0.07]kg
+ [16/23] [rh_p12_rn_l2] mass:[0.02]kg
+ [17/23] [body_obj_mug_5] mass:[0.00]kg
+ [18/23] [object_mug_5] mass:[0.08]kg
+ [19/23] [body_obj_plate_11] mass:[0.00]kg
+ [20/23] [object_plate_11] mass:[0.10]kg
+ [21/23] [body_obj_mug_6] mass:[0.00]kg
+ [22/23] [object_mug_6] mass:[0.08]kg
+body_total_mass:[13.35]kg
+
+n_geom:[116]
+geom_names:['floor', None, 'front_object_table', None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
+
+n_mesh:[112]
+mesh_names:['base_unit', 'link1', 'link2', 'link3', 'link4', 'link5', 'link6', 'flange', 'base', 'r1', 'r2', 'l1', 'l2', 'mug_5_normalized_0_vis', 'mug_5_normalized_collision_22._coll', 'mug_5_normalized_collision_23._coll', 'mug_5_normalized_collision_21._coll', 'mug_5_normalized_collision_20._coll', 'mug_5_normalized_collision_24._coll', 'mug_5_normalized_collision_30._coll', 'mug_5_normalized_collision_18._coll', 'mug_5_normalized_collision_19._coll', 'mug_5_normalized_collision_31._coll', 'mug_5_normalized_collision_25._coll', 'mug_5_normalized_collision_27._coll', 'mug_5_normalized_collision_26._coll', 'mug_5_normalized_collision_9._coll', 'mug_5_normalized_collision_8._coll', 'mug_5_normalized_collision_6._coll', 'mug_5_normalized_collision_7._coll', 'mug_5_normalized_collision_5._coll', 'mug_5_normalized_collision_4._coll', 'mug_5_normalized_collision_0._coll', 'mug_5_normalized_collision_1._coll', 'mug_5_normalized_collision_3._coll', 'mug_5_normalized_collision_2._coll', 'mug_5_normalized_collision_17._coll', 'mug_5_normalized_collision_16._coll', 'mug_5_normalized_collision_28._coll', 'mug_5_normalized_collision_14._coll', 'mug_5_normalized_collision_15._coll', 'mug_5_normalized_collision_29._coll', 'mug_5_normalized_collision_11._coll', 'mug_5_normalized_collision_10._coll', 'mug_5_normalized_collision_12._coll', 'mug_5_normalized_collision_13._coll', 'plate_11_normalized_0_vis', 'plate_11_normalized_collision_22._coll', 'plate_11_normalized_collision_23._coll', 'plate_11_normalized_collision_21._coll', 'plate_11_normalized_collision_20._coll', 'plate_11_normalized_collision_24._coll', 'plate_11_normalized_collision_30._coll', 'plate_11_normalized_collision_18._coll', 'plate_11_normalized_collision_19._coll', 'plate_11_normalized_collision_31._coll', 'plate_11_normalized_collision_25._coll', 'plate_11_normalized_collision_27._coll', 'plate_11_normalized_collision_26._coll', 'plate_11_normalized_collision_9._coll', 'plate_11_normalized_collision_8._coll', 'plate_11_normalized_collision_6._coll', 'plate_11_normalized_collision_7._coll', 'plate_11_normalized_collision_5._coll', 'plate_11_normalized_collision_4._coll', 'plate_11_normalized_collision_0._coll', 'plate_11_normalized_collision_1._coll', 'plate_11_normalized_collision_3._coll', 'plate_11_normalized_collision_2._coll', 'plate_11_normalized_collision_17._coll', 'plate_11_normalized_collision_16._coll', 'plate_11_normalized_collision_28._coll', 'plate_11_normalized_collision_14._coll', 'plate_11_normalized_collision_15._coll', 'plate_11_normalized_collision_29._coll', 'plate_11_normalized_collision_11._coll', 'plate_11_normalized_collision_10._coll', 'plate_11_normalized_collision_12._coll', 'plate_11_normalized_collision_13._coll', 'mug_6_normalized_0_vis', 'mug_6_normalized_collision_22._coll', 'mug_6_normalized_collision_23._coll', 'mug_6_normalized_collision_21._coll', 'mug_6_normalized_collision_20._coll', 'mug_6_normalized_collision_24._coll', 'mug_6_normalized_collision_30._coll', 'mug_6_normalized_collision_18._coll', 'mug_6_normalized_collision_19._coll', 'mug_6_normalized_collision_31._coll', 'mug_6_normalized_collision_25._coll', 'mug_6_normalized_collision_27._coll', 'mug_6_normalized_collision_26._coll', 'mug_6_normalized_collision_9._coll', 'mug_6_normalized_collision_8._coll', 'mug_6_normalized_collision_6._coll', 'mug_6_normalized_collision_7._coll', 'mug_6_normalized_collision_5._coll', 'mug_6_normalized_collision_4._coll', 'mug_6_normalized_collision_0._coll', 'mug_6_normalized_collision_1._coll', 'mug_6_normalized_collision_3._coll', 'mug_6_normalized_collision_2._coll', 'mug_6_normalized_collision_17._coll', 'mug_6_normalized_collision_16._coll', 'mug_6_normalized_collision_28._coll', 'mug_6_normalized_collision_14._coll', 'mug_6_normalized_collision_15._coll', 'mug_6_normalized_collision_29._coll', 'mug_6_normalized_collision_11._coll', 'mug_6_normalized_collision_10._coll', 'mug_6_normalized_collision_12._coll', 'mug_6_normalized_collision_13._coll']
+
+n_joint:[13]
+ [0/13] [joint1] axis:[0. 0. 1.]
+ [1/13] [joint2] axis:[0. 1. 0.]
+ [2/13] [joint3] axis:[0. 1. 0.]
+ [3/13] [joint4] axis:[0. 1. 0.]
+ [4/13] [joint5] axis:[0. 0. 1.]
+ [5/13] [joint6] axis:[0. 1. 0.]
+ [6/13] [rh_r1] axis:[1. 0. 0.]
+ [7/13] [rh_r2] axis:[-1.  0.  0.]
+ [8/13] [rh_l1] axis:[-1.  0.  0.]
+ [9/13] [rh_l2] axis:[1. 0. 0.]
+ [10/13] [None] axis:[0. 0. 1.]
+ [11/13] [None] axis:[0. 0. 1.]
+ [12/13] [None] axis:[0. 0. 1.]
+
+n_dof:[28] (=number of rows of Jacobian)
+ [0/28] [None] attached joint:[joint1] body:[link1]
+ [1/28] [None] attached joint:[joint2] body:[link2]
+ [2/28] [None] attached joint:[joint3] body:[link3]
+ [3/28] [None] attached joint:[joint4] body:[link4]
+ [4/28] [None] attached joint:[joint5] body:[link5]
+ [5/28] [None] attached joint:[joint6] body:[link6]
+ [6/28] [None] attached joint:[rh_r1] body:[rh_p12_rn_r1]
+ [7/28] [None] attached joint:[rh_r2] body:[rh_p12_rn_r2]
+ [8/28] [None] attached joint:[rh_l1] body:[rh_p12_rn_l1]
+ [9/28] [None] attached joint:[rh_l2] body:[rh_p12_rn_l2]
+ [10/28] [None] attached joint:[None] body:[body_obj_mug_5]
+ [11/28] [None] attached joint:[None] body:[body_obj_mug_5]
+ [12/28] [None] attached joint:[None] body:[body_obj_mug_5]
+ [13/28] [None] attached joint:[None] body:[body_obj_mug_5]
+ [14/28] [None] attached joint:[None] body:[body_obj_mug_5]
+ [15/28] [None] attached joint:[None] body:[body_obj_mug_5]
+ [16/28] [None] attached joint:[None] body:[body_obj_plate_11]
+ [17/28] [None] attached joint:[None] body:[body_obj_plate_11]
+ [18/28] [None] attached joint:[None] body:[body_obj_plate_11]
+ [19/28] [None] attached joint:[None] body:[body_obj_plate_11]
+ [20/28] [None] attached joint:[None] body:[body_obj_plate_11]
+ [21/28] [None] attached joint:[None] body:[body_obj_plate_11]
+ [22/28] [None] attached joint:[None] body:[body_obj_mug_6]
+ [23/28] [None] attached joint:[None] body:[body_obj_mug_6]
+ [24/28] [None] attached joint:[None] body:[body_obj_mug_6]
+ [25/28] [None] attached joint:[None] body:[body_obj_mug_6]
+ [26/28] [None] attached joint:[None] body:[body_obj_mug_6]
+ [27/28] [None] attached joint:[None] body:[body_obj_mug_6]
+
+Free joint information. n_free_joint:[3]
+ [0/3] [None] body_name_attached:[body_obj_mug_5]
+ [1/3] [None] body_name_attached:[body_obj_plate_11]
+ [2/3] [None] body_name_attached:[body_obj_mug_6]
+
+Revolute joint information. n_rev_joint:[10]
+ [0/10] [joint1] range:[-6.283]~[6.283]
+ [1/10] [joint2] range:[-6.283]~[6.283]
+ [2/10] [joint3] range:[-6.283]~[6.283]
+ [3/10] [joint4] range:[-6.283]~[6.283]
+ [4/10] [joint5] range:[-6.283]~[6.283]
+ [5/10] [joint6] range:[-6.283]~[6.283]
+ [6/10] [rh_r1] range:[0.000]~[1.100]
+ [7/10] [rh_r2] range:[0.000]~[1.000]
+ [8/10] [rh_l1] range:[0.000]~[1.100]
+ [9/10] [rh_l2] range:[0.000]~[1.000]
+
+Prismatic joint information. n_pri_joint:[0]
+
+Control information. n_ctrl:[10]
+ [0/10] [actuator_joint1] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [1/10] [actuator_joint2] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [2/10] [actuator_joint3] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [3/10] [actuator_joint4] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [4/10] [actuator_joint5] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [5/10] [actuator_joint6] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [6/10] [actuator_rh_r1] range:[0.000]~[1.100] gear:[1.00] type:[JOINT]
+ [7/10] [actuator_rh_r2] range:[0.000]~[1.000] gear:[1.00] type:[JOINT]
+ [8/10] [actuator_rh_l1] range:[0.000]~[1.100] gear:[1.00] type:[JOINT]
+ [9/10] [actuator_rh_l2] range:[0.000]~[1.000] gear:[1.00] type:[JOINT]
+
+Camera information. n_cam:[4]
+ [0/4] [agentview] fov:[60.0]
+ [1/4] [topview] fov:[90.0]
+ [2/4] [sideview] fov:[90.0]
+ [3/4] [egocentric] fov:[90.0]
+
+n_sensor:[0]
+sensor_names:[]
+n_site:[9]
+site_names:['bottom_site_mug_5', 'top_site_mug_5', 'horizontal_radius_site_mug_5', 'bottom_site_plate_11', 'top_site_plate_11', 'horizontal_radius_site_plate_11', 'bottom_site_mug_6', 'top_site_mug_6', 'horizontal_radius_site_mug_6']
+-----------------------------------------------------------------------------
+env:[Tabletop] reset
+env:[Tabletop] reset
+env:[Tabletop] reset
+DONE INITIALIZATION
+env:[Tabletop] reset
+DONE INITIALIZATION
+env:[Tabletop] reset
+DONE INITIALIZATION
+test_instruction_changes_target_without_changing_scene (test_language.LanguageTests) ... ok
+env:[Tabletop] reset
+DONE INITIALIZATION
+test_joint_state_and_recorded_command_are_distinct (test_language.LanguageTests) ... ok
+test_legacy_success_follows_language_target (test_language.LanguageTests) ... ok
+test_single_cup_data_cannot_be_silently_used_as_joint_state (test_language.LanguageTests) ... ok
+test_split_keeps_whole_episodes_and_stats_ignore_holdout (test_language.LanguageTests) ... ok
+
+-----------------------------------------------------------------------------
+name:[Tabletop] dt:[0.002] HZ:[500]
+ n_qpos:[24] n_qvel:[22] n_qacc:[22] n_ctrl:[10]
+ integrator:[IMPLICITFAST]
+
+n_body:[21]
+ [0/21] [world] mass:[0.00]kg
+ [1/21] [front_object_table] mass:[1.00]kg
+ [2/21] [camera] mass:[0.00]kg
+ [3/21] [camera2] mass:[0.00]kg
+ [4/21] [camera3] mass:[0.00]kg
+ [5/21] [link1] mass:[2.06]kg
+ [6/21] [link2] mass:[3.68]kg
+ [7/21] [link3] mass:[2.39]kg
+ [8/21] [link4] mass:[1.40]kg
+ [9/21] [link5] mass:[1.40]kg
+ [10/21] [link6] mass:[0.65]kg
+ [11/21] [camera_center] mass:[0.00]kg
+ [12/21] [tcp_link] mass:[0.32]kg
+ [13/21] [rh_p12_rn_r1] mass:[0.07]kg
+ [14/21] [rh_p12_rn_r2] mass:[0.02]kg
+ [15/21] [rh_p12_rn_l1] mass:[0.07]kg
+ [16/21] [rh_p12_rn_l2] mass:[0.02]kg
+ [17/21] [body_obj_mug_5] mass:[0.00]kg
+ [18/21] [object_mug_5] mass:[0.08]kg
+ [19/21] [body_obj_plate_11] mass:[0.00]kg
+ [20/21] [object_plate_11] mass:[0.10]kg
+body_total_mass:[13.27]kg
+
+n_geom:[83]
+geom_names:['floor', None, 'front_object_table', None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
+
+n_mesh:[79]
+mesh_names:['base_unit', 'link1', 'link2', 'link3', 'link4', 'link5', 'link6', 'flange', 'base', 'r1', 'r2', 'l1', 'l2', 'mug_5_normalized_0_vis', 'mug_5_normalized_collision_22._coll', 'mug_5_normalized_collision_23._coll', 'mug_5_normalized_collision_21._coll', 'mug_5_normalized_collision_20._coll', 'mug_5_normalized_collision_24._coll', 'mug_5_normalized_collision_30._coll', 'mug_5_normalized_collision_18._coll', 'mug_5_normalized_collision_19._coll', 'mug_5_normalized_collision_31._coll', 'mug_5_normalized_collision_25._coll', 'mug_5_normalized_collision_27._coll', 'mug_5_normalized_collision_26._coll', 'mug_5_normalized_collision_9._coll', 'mug_5_normalized_collision_8._coll', 'mug_5_normalized_collision_6._coll', 'mug_5_normalized_collision_7._coll', 'mug_5_normalized_collision_5._coll', 'mug_5_normalized_collision_4._coll', 'mug_5_normalized_collision_0._coll', 'mug_5_normalized_collision_1._coll', 'mug_5_normalized_collision_3._coll', 'mug_5_normalized_collision_2._coll', 'mug_5_normalized_collision_17._coll', 'mug_5_normalized_collision_16._coll', 'mug_5_normalized_collision_28._coll', 'mug_5_normalized_collision_14._coll', 'mug_5_normalized_collision_15._coll', 'mug_5_normalized_collision_29._coll', 'mug_5_normalized_collision_11._coll', 'mug_5_normalized_collision_10._coll', 'mug_5_normalized_collision_12._coll', 'mug_5_normalized_collision_13._coll', 'plate_11_normalized_0_vis', 'plate_11_normalized_collision_22._coll', 'plate_11_normalized_collision_23._coll', 'plate_11_normalized_collision_21._coll', 'plate_11_normalized_collision_20._coll', 'plate_11_normalized_collision_24._coll', 'plate_11_normalized_collision_30._coll', 'plate_11_normalized_collision_18._coll', 'plate_11_normalized_collision_19._coll', 'plate_11_normalized_collision_31._coll', 'plate_11_normalized_collision_25._coll', 'plate_11_normalized_collision_27._coll', 'plate_11_normalized_collision_26._coll', 'plate_11_normalized_collision_9._coll', 'plate_11_normalized_collision_8._coll', 'plate_11_normalized_collision_6._coll', 'plate_11_normalized_collision_7._coll', 'plate_11_normalized_collision_5._coll', 'plate_11_normalized_collision_4._coll', 'plate_11_normalized_collision_0._coll', 'plate_11_normalized_collision_1._coll', 'plate_11_normalized_collision_3._coll', 'plate_11_normalized_collision_2._coll', 'plate_11_normalized_collision_17._coll', 'plate_11_normalized_collision_16._coll', 'plate_11_normalized_collision_28._coll', 'plate_11_normalized_collision_14._coll', 'plate_11_normalized_collision_15._coll', 'plate_11_normalized_collision_29._coll', 'plate_11_normalized_collision_11._coll', 'plate_11_normalized_collision_10._coll', 'plate_11_normalized_collision_12._coll', 'plate_11_normalized_collision_13._coll']
+
+n_joint:[12]
+ [0/12] [joint1] axis:[0. 0. 1.]
+ [1/12] [joint2] axis:[0. 1. 0.]
+ [2/12] [joint3] axis:[0. 1. 0.]
+ [3/12] [joint4] axis:[0. 1. 0.]
+ [4/12] [joint5] axis:[0. 0. 1.]
+ [5/12] [joint6] axis:[0. 1. 0.]
+ [6/12] [rh_r1] axis:[1. 0. 0.]
+ [7/12] [rh_r2] axis:[-1.  0.  0.]
+ [8/12] [rh_l1] axis:[-1.  0.  0.]
+ [9/12] [rh_l2] axis:[1. 0. 0.]
+ [10/12] [None] axis:[0. 0. 1.]
+ [11/12] [None] axis:[0. 0. 1.]
+
+n_dof:[22] (=number of rows of Jacobian)
+ [0/22] [None] attached joint:[joint1] body:[link1]
+ [1/22] [None] attached joint:[joint2] body:[link2]
+ [2/22] [None] attached joint:[joint3] body:[link3]
+ [3/22] [None] attached joint:[joint4] body:[link4]
+ [4/22] [None] attached joint:[joint5] body:[link5]
+ [5/22] [None] attached joint:[joint6] body:[link6]
+ [6/22] [None] attached joint:[rh_r1] body:[rh_p12_rn_r1]
+ [7/22] [None] attached joint:[rh_r2] body:[rh_p12_rn_r2]
+ [8/22] [None] attached joint:[rh_l1] body:[rh_p12_rn_l1]
+ [9/22] [None] attached joint:[rh_l2] body:[rh_p12_rn_l2]
+ [10/22] [None] attached joint:[None] body:[body_obj_mug_5]
+ [11/22] [None] attached joint:[None] body:[body_obj_mug_5]
+ [12/22] [None] attached joint:[None] body:[body_obj_mug_5]
+ [13/22] [None] attached joint:[None] body:[body_obj_mug_5]
+ [14/22] [None] attached joint:[None] body:[body_obj_mug_5]
+ [15/22] [None] attached joint:[None] body:[body_obj_mug_5]
+ [16/22] [None] attached joint:[None] body:[body_obj_plate_11]
+ [17/22] [None] attached joint:[None] body:[body_obj_plate_11]
+ [18/22] [None] attached joint:[None] body:[body_obj_plate_11]
+ [19/22] [None] attached joint:[None] body:[body_obj_plate_11]
+ [20/22] [None] attached joint:[None] body:[body_obj_plate_11]
+ [21/22] [None] attached joint:[None] body:[body_obj_plate_11]
+
+Free joint information. n_free_joint:[2]
+ [0/2] [None] body_name_attached:[body_obj_mug_5]
+ [1/2] [None] body_name_attached:[body_obj_plate_11]
+
+Revolute joint information. n_rev_joint:[10]
+ [0/10] [joint1] range:[-6.283]~[6.283]
+ [1/10] [joint2] range:[-6.283]~[6.283]
+ [2/10] [joint3] range:[-6.283]~[6.283]
+ [3/10] [joint4] range:[-6.283]~[6.283]
+ [4/10] [joint5] range:[-6.283]~[6.283]
+ [5/10] [joint6] range:[-6.283]~[6.283]
+ [6/10] [rh_r1] range:[0.000]~[1.100]
+ [7/10] [rh_r2] range:[0.000]~[1.000]
+ [8/10] [rh_l1] range:[0.000]~[1.100]
+ [9/10] [rh_l2] range:[0.000]~[1.000]
+
+Prismatic joint information. n_pri_joint:[0]
+
+Control information. n_ctrl:[10]
+ [0/10] [actuator_joint1] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [1/10] [actuator_joint2] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [2/10] [actuator_joint3] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [3/10] [actuator_joint4] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [4/10] [actuator_joint5] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [5/10] [actuator_joint6] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [6/10] [actuator_rh_r1] range:[0.000]~[1.100] gear:[1.00] type:[JOINT]
+ [7/10] [actuator_rh_r2] range:[0.000]~[1.000] gear:[1.00] type:[JOINT]
+ [8/10] [actuator_rh_l1] range:[0.000]~[1.100] gear:[1.00] type:[JOINT]
+ [9/10] [actuator_rh_l2] range:[0.000]~[1.000] gear:[1.00] type:[JOINT]
+
+Camera information. n_cam:[4]
+ [0/4] [agentview] fov:[60.0]
+ [1/4] [topview] fov:[90.0]
+ [2/4] [sideview] fov:[90.0]
+ [3/4] [egocentric] fov:[90.0]
+
+n_sensor:[0]
+sensor_names:[]
+n_site:[6]
+site_names:['bottom_site_mug_5', 'top_site_mug_5', 'horizontal_radius_site_mug_5', 'bottom_site_plate_11', 'top_site_plate_11', 'horizontal_radius_site_plate_11']
+-----------------------------------------------------------------------------
+env:[Tabletop] reset
+env:[Tabletop] reset
+env:[Tabletop] initalize viewer
+DONE INITIALIZATION
+test_gui_render_preserves_camera_pixels_and_physics (test_rendering.RenderingTests) ... ok
+
+-----------------------------------------------------------------------------
+name:[Tabletop] dt:[0.002] HZ:[500]
+ n_qpos:[24] n_qvel:[22] n_qacc:[22] n_ctrl:[10]
+ integrator:[IMPLICITFAST]
+
+n_body:[21]
+ [0/21] [world] mass:[0.00]kg
+ [1/21] [front_object_table] mass:[1.00]kg
+ [2/21] [camera] mass:[0.00]kg
+ [3/21] [camera2] mass:[0.00]kg
+ [4/21] [camera3] mass:[0.00]kg
+ [5/21] [link1] mass:[2.06]kg
+ [6/21] [link2] mass:[3.68]kg
+ [7/21] [link3] mass:[2.39]kg
+ [8/21] [link4] mass:[1.40]kg
+ [9/21] [link5] mass:[1.40]kg
+ [10/21] [link6] mass:[0.65]kg
+ [11/21] [camera_center] mass:[0.00]kg
+ [12/21] [tcp_link] mass:[0.32]kg
+ [13/21] [rh_p12_rn_r1] mass:[0.07]kg
+ [14/21] [rh_p12_rn_r2] mass:[0.02]kg
+ [15/21] [rh_p12_rn_l1] mass:[0.07]kg
+ [16/21] [rh_p12_rn_l2] mass:[0.02]kg
+ [17/21] [body_obj_mug_5] mass:[0.00]kg
+ [18/21] [object_mug_5] mass:[0.08]kg
+ [19/21] [body_obj_plate_11] mass:[0.00]kg
+ [20/21] [object_plate_11] mass:[0.10]kg
+body_total_mass:[13.27]kg
+
+n_geom:[83]
+geom_names:['floor', None, 'front_object_table', None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
+
+n_mesh:[79]
+mesh_names:['base_unit', 'link1', 'link2', 'link3', 'link4', 'link5', 'link6', 'flange', 'base', 'r1', 'r2', 'l1', 'l2', 'mug_5_normalized_0_vis', 'mug_5_normalized_collision_22._coll', 'mug_5_normalized_collision_23._coll', 'mug_5_normalized_collision_21._coll', 'mug_5_normalized_collision_20._coll', 'mug_5_normalized_collision_24._coll', 'mug_5_normalized_collision_30._coll', 'mug_5_normalized_collision_18._coll', 'mug_5_normalized_collision_19._coll', 'mug_5_normalized_collision_31._coll', 'mug_5_normalized_collision_25._coll', 'mug_5_normalized_collision_27._coll', 'mug_5_normalized_collision_26._coll', 'mug_5_normalized_collision_9._coll', 'mug_5_normalized_collision_8._coll', 'mug_5_normalized_collision_6._coll', 'mug_5_normalized_collision_7._coll', 'mug_5_normalized_collision_5._coll', 'mug_5_normalized_collision_4._coll', 'mug_5_normalized_collision_0._coll', 'mug_5_normalized_collision_1._coll', 'mug_5_normalized_collision_3._coll', 'mug_5_normalized_collision_2._coll', 'mug_5_normalized_collision_17._coll', 'mug_5_normalized_collision_16._coll', 'mug_5_normalized_collision_28._coll', 'mug_5_normalized_collision_14._coll', 'mug_5_normalized_collision_15._coll', 'mug_5_normalized_collision_29._coll', 'mug_5_normalized_collision_11._coll', 'mug_5_normalized_collision_10._coll', 'mug_5_normalized_collision_12._coll', 'mug_5_normalized_collision_13._coll', 'plate_11_normalized_0_vis', 'plate_11_normalized_collision_22._coll', 'plate_11_normalized_collision_23._coll', 'plate_11_normalized_collision_21._coll', 'plate_11_normalized_collision_20._coll', 'plate_11_normalized_collision_24._coll', 'plate_11_normalized_collision_30._coll', 'plate_11_normalized_collision_18._coll', 'plate_11_normalized_collision_19._coll', 'plate_11_normalized_collision_31._coll', 'plate_11_normalized_collision_25._coll', 'plate_11_normalized_collision_27._coll', 'plate_11_normalized_collision_26._coll', 'plate_11_normalized_collision_9._coll', 'plate_11_normalized_collision_8._coll', 'plate_11_normalized_collision_6._coll', 'plate_11_normalized_collision_7._coll', 'plate_11_normalized_collision_5._coll', 'plate_11_normalized_collision_4._coll', 'plate_11_normalized_collision_0._coll', 'plate_11_normalized_collision_1._coll', 'plate_11_normalized_collision_3._coll', 'plate_11_normalized_collision_2._coll', 'plate_11_normalized_collision_17._coll', 'plate_11_normalized_collision_16._coll', 'plate_11_normalized_collision_28._coll', 'plate_11_normalized_collision_14._coll', 'plate_11_normalized_collision_15._coll', 'plate_11_normalized_collision_29._coll', 'plate_11_normalized_collision_11._coll', 'plate_11_normalized_collision_10._coll', 'plate_11_normalized_collision_12._coll', 'plate_11_normalized_collision_13._coll']
+
+n_joint:[12]
+ [0/12] [joint1] axis:[0. 0. 1.]
+ [1/12] [joint2] axis:[0. 1. 0.]
+ [2/12] [joint3] axis:[0. 1. 0.]
+ [3/12] [joint4] axis:[0. 1. 0.]
+ [4/12] [joint5] axis:[0. 0. 1.]
+ [5/12] [joint6] axis:[0. 1. 0.]
+ [6/12] [rh_r1] axis:[1. 0. 0.]
+ [7/12] [rh_r2] axis:[-1.  0.  0.]
+ [8/12] [rh_l1] axis:[-1.  0.  0.]
+ [9/12] [rh_l2] axis:[1. 0. 0.]
+ [10/12] [None] axis:[0. 0. 1.]
+ [11/12] [None] axis:[0. 0. 1.]
+
+n_dof:[22] (=number of rows of Jacobian)
+ [0/22] [None] attached joint:[joint1] body:[link1]
+ [1/22] [None] attached joint:[joint2] body:[link2]
+ [2/22] [None] attached joint:[joint3] body:[link3]
+ [3/22] [None] attached joint:[joint4] body:[link4]
+ [4/22] [None] attached joint:[joint5] body:[link5]
+ [5/22] [None] attached joint:[joint6] body:[link6]
+ [6/22] [None] attached joint:[rh_r1] body:[rh_p12_rn_r1]
+ [7/22] [None] attached joint:[rh_r2] body:[rh_p12_rn_r2]
+ [8/22] [None] attached joint:[rh_l1] body:[rh_p12_rn_l1]
+ [9/22] [None] attached joint:[rh_l2] body:[rh_p12_rn_l2]
+ [10/22] [None] attached joint:[None] body:[body_obj_mug_5]
+ [11/22] [None] attached joint:[None] body:[body_obj_mug_5]
+ [12/22] [None] attached joint:[None] body:[body_obj_mug_5]
+ [13/22] [None] attached joint:[None] body:[body_obj_mug_5]
+ [14/22] [None] attached joint:[None] body:[body_obj_mug_5]
+ [15/22] [None] attached joint:[None] body:[body_obj_mug_5]
+ [16/22] [None] attached joint:[None] body:[body_obj_plate_11]
+ [17/22] [None] attached joint:[None] body:[body_obj_plate_11]
+ [18/22] [None] attached joint:[None] body:[body_obj_plate_11]
+ [19/22] [None] attached joint:[None] body:[body_obj_plate_11]
+ [20/22] [None] attached joint:[None] body:[body_obj_plate_11]
+ [21/22] [None] attached joint:[None] body:[body_obj_plate_11]
+
+Free joint information. n_free_joint:[2]
+ [0/2] [None] body_name_attached:[body_obj_mug_5]
+ [1/2] [None] body_name_attached:[body_obj_plate_11]
+
+Revolute joint information. n_rev_joint:[10]
+ [0/10] [joint1] range:[-6.283]~[6.283]
+ [1/10] [joint2] range:[-6.283]~[6.283]
+ [2/10] [joint3] range:[-6.283]~[6.283]
+ [3/10] [joint4] range:[-6.283]~[6.283]
+ [4/10] [joint5] range:[-6.283]~[6.283]
+ [5/10] [joint6] range:[-6.283]~[6.283]
+ [6/10] [rh_r1] range:[0.000]~[1.100]
+ [7/10] [rh_r2] range:[0.000]~[1.000]
+ [8/10] [rh_l1] range:[0.000]~[1.100]
+ [9/10] [rh_l2] range:[0.000]~[1.000]
+
+Prismatic joint information. n_pri_joint:[0]
+
+Control information. n_ctrl:[10]
+ [0/10] [actuator_joint1] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [1/10] [actuator_joint2] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [2/10] [actuator_joint3] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [3/10] [actuator_joint4] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [4/10] [actuator_joint5] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [5/10] [actuator_joint6] range:[-6.283]~[6.283] gear:[1.00] type:[JOINT]
+ [6/10] [actuator_rh_r1] range:[0.000]~[1.100] gear:[1.00] type:[JOINT]
+ [7/10] [actuator_rh_r2] range:[0.000]~[1.000] gear:[1.00] type:[JOINT]
+ [8/10] [actuator_rh_l1] range:[0.000]~[1.100] gear:[1.00] type:[JOINT]
+ [9/10] [actuator_rh_l2] range:[0.000]~[1.000] gear:[1.00] type:[JOINT]
+
+Camera information. n_cam:[4]
+ [0/4] [agentview] fov:[60.0]
+ [1/4] [topview] fov:[90.0]
+ [2/4] [sideview] fov:[90.0]
+ [3/4] [egocentric] fov:[90.0]
+
+n_sensor:[0]
+sensor_names:[]
+n_site:[6]
+site_names:['bottom_site_mug_5', 'top_site_mug_5', 'horizontal_radius_site_mug_5', 'bottom_site_plate_11', 'top_site_plate_11', 'horizontal_radius_site_plate_11']
+-----------------------------------------------------------------------------
+env:[Tabletop] reset
+env:[Tabletop] reset
+DONE INITIALIZATION
+DONE INITIALIZATION
+test_existing_data_is_never_overwritten (test_reproduction.ReproductionTests) ... ok
+DONE INITIALIZATION
+test_ik_command_preparation_preserves_full_integration_state (test_reproduction.ReproductionTests) ... ok
+DONE INITIALIZATION
+test_label_is_command_and_does_not_alias_next_command (test_reproduction.ReproductionTests) ... ok
+DONE INITIALIZATION
+test_lerobot_parquet_roundtrip_keeps_images_and_action_labels (test_reproduction.ReproductionTests) ... WARNING:root:'torchcodec' is not available in your platform, falling back to 'pyav' as a default decoder
+
+Map:   0%|          | 0/3 [00:00<?, ? examples/s]
+Map: 100%|��������������������| 3/3 [00:00<00:00, 272.72 examples/s]
+
+Creating parquet from Arrow format:   0%|          | 0/1 [00:00<?, ?ba/s]
+Creating parquet from Arrow format: 100%|��������������������| 1/1 [00:00<00:00, 333.38ba/s]
+
+Generating train split: 0 examples [00:00, ? examples/s]
+Generating train split: 3 examples [00:00, 599.24 examples/s]
+ok
+DONE INITIALIZATION
+test_physics_snapshot_replays_identical_joint_commands (test_reproduction.ReproductionTests) ... ok
+test_all_core_weights_required_and_foreign_normalizers_ignored (test_smolvla.PretrainedTransferTests) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 30.350s
+
+OK

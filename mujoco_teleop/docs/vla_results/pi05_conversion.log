@@ -1,0 +1,66 @@
+WARNING:lerobot.utils.import_utils:'torchcodec' is not available in your platform, falling back to 'pyav' as a default decoder
+
+Map:   0%|          | 0/602 [00:00<?, ? examples/s]
+Map:  13%|����        | 81/602 [00:00<00:00, 797.94 examples/s]
+Map:  34%|��������      | 203/602 [00:00<00:00, 797.26 examples/s]
+Map:  48%|����������     | 289/602 [00:00<00:00, 816.89 examples/s]
+Map:  62%|��������������   | 376/602 [00:00<00:00, 834.98 examples/s]
+Map:  77%|����������������  | 462/602 [00:00<00:00, 841.95 examples/s]
+Map:  97%|��������������������| 584/602 [00:00<00:00, 821.03 examples/s]
+Map: 100%|��������������������| 602/602 [00:00<00:00, 773.45 examples/s]
+WARNING:lerobot.utils.import_utils:'torchcodec' is not available in your platform, falling back to 'pyav' as a default decoder
+{
+  "source": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\data\\pi05_single_001",
+  "lerobot_version": "0.6.1",
+  "fps": 20,
+  "state_kind": "eef_pose",
+  "action_kind": "absolute_joint_targets",
+  "labels_verified": true,
+  "split_seed": 42,
+  "train_episodes": [
+    0
+  ],
+  "heldout_episodes": [],
+  "normalization_episodes": [
+    0
+  ],
+  "total_frames": 602,
+  "repo_id": "local/omy-pi05",
+  "alignment": {
+    "frames": 602,
+    "episodes": 1,
+    "chunk_size": 50
+  },
+  "proposed_training_command": [
+    "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\.venv-pi05\\Scripts\\python.exe",
+    "-m",
+    "pi05_omy_train",
+    "--dataset.repo_id=local/omy-pi05",
+    "--dataset.root=C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\data\\pi05_v3_001",
+    "--dataset.episodes=[0]",
+    "--dataset.eval_split=0.0",
+    "--policy.type=pi05",
+    "--policy.pretrained_path=lerobot/pi05_base",
+    "--policy.push_to_hub=false",
+    "--policy.device=cuda",
+    "--policy.dtype=bfloat16",
+    "--policy.use_relative_actions=false",
+    "--policy.train_expert_only=true",
+    "--policy.freeze_vision_encoder=true",
+    "--policy.gradient_checkpointing=true",
+    "--policy.compile_model=false",
+    "--policy.chunk_size=50",
+    "--policy.n_action_steps=5",
+    "--steps=10000",
+    "--batch_size=1",
+    "--num_workers=0",
+    "--env_eval_freq=0",
+    "--eval_steps=0",
+    "--wandb.enable=false",
+    "--log_freq=50",
+    "--save_freq=2000",
+    "--seed=42",
+    "--output_dir=C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\checkpoints\\pi05_omy",
+    "--job_name=pi05_omy"
+  ]
+}

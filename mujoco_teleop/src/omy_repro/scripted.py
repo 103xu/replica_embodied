@@ -6,7 +6,12 @@ import numpy as np
 
 
 def scripted_actions(env):
-    mug, plate = [x.copy() for x in env.get_obj_pose()]
+    poses = [x.copy() for x in env.get_obj_pose()]
+    if len(poses) == 3:
+        mug = poses[0 if env.obj_target == 'body_obj_mug_5' else 1]
+        plate = poses[2]
+    else:
+        mug, plate = poses
 
     def move(target, grip=0.0, count=None):
         target = np.asarray(target, dtype=np.float32)

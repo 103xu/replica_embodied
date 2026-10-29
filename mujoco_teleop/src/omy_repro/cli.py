@@ -11,6 +11,50 @@ def parser():
     p = argparse.ArgumentParser(description='Every-Embodied OMY sections 1-2: collect and replay')
     sub = p.add_subparsers(dest='command', required=True)
     sub.add_parser('doctor', help='Report the active Python, dependencies, CUDA and model status')
+    language_collect = sub.add_parser('collect-language', help='Section 5: instruction-labelled two-cup demonstrations')
+    language_collect.add_argument('--dataset', type=Path, default=None)
+    language_collect.add_argument('--episodes', type=int, default=20)
+    language_collect.add_argument('--seed', type=int, default=0)
+    language_collect.add_argument('--color', choices=['alternate', 'red', 'blue'], default='alternate')
+    language_collect.add_argument('--scripted', action='store_true')
+    language_collect.add_argument('--headless', action='store_true')
+    language_collect.add_argument('--fast', action='store_true')
+    language_replay = sub.add_parser('replay-language', help='Section 6: replay actions with their exact instruction')
+    language_replay.add_argument('--dataset', type=Path, default=None)
+    language_replay.add_argument('--episode', type=int, default=0)
+    language_replay.add_argument('--output', type=Path, default=None)
+    language_replay.add_argument('--headless', action='store_true')
+    language_replay.add_argument('--fast', action='store_true')
+    language_audit = sub.add_parser('audit-language', help='Section 9: audit all recorded physical trajectories, including upright placement')
+    language_audit.add_argument('--dataset', type=Path, required=True)
+    language_audit.add_argument('--output', type=Path, required=True)
+    smoltrain = sub.add_parser('train-smolvla', help='Section 8: fine-tune strictly loaded pretrained SmolVLA')
+    smoltrain.add_argument('--dataset', type=Path, default=None)
+    smoltrain.add_argument('--output', type=Path, default=None)
+    smoltrain.add_argument('--init-checkpoint', type=Path, default=None)
+    smoltrain.add_argument('--steps', type=int, default=20000)
+    smoltrain.add_argument('--batch-size', type=int, default=1)
+    smoltrain.add_argument('--chunk-size', type=int, default=5)
+    smoltrain.add_argument('--holdout-episodes', type=int, default=2)
+    smoltrain.add_argument('--learning-rate', type=float, default=1e-4)
+    smoltrain.add_argument('--seed', type=int, default=42)
+    smoltrain.add_argument('--device', choices=['cpu', 'cuda'], default='cuda')
+    smoltrain.add_argument('--log-every', type=int, default=100)
+    smoldeploy = sub.add_parser('deploy-smolvla', help='Section 8: evaluate red/blue language instructions in live MuJoCo')
+    smoldeploy.add_argument('--checkpoint', type=Path, required=True)
+    smoldeploy.add_argument('--output', type=Path, required=True)
+    smoldeploy.add_argument('--seed', type=int, default=0)
+    smoldeploy.add_argument('--device', choices=['cpu', 'cuda'], default='cuda')
+    smoldeploy.add_argument('--max-steps', type=int, default=1000)
+    smoldeploy.add_argument('--headless', action='store_true')
+    smoldeploy.add_argument('--fast', action='store_true')
+    smoldiagnose = sub.add_parser('diagnose-smolvla', help='Section 9: teacher-forced action error and fixed-noise language contrast')
+    smoldiagnose.add_argument('--dataset', type=Path, required=True)
+    smoldiagnose.add_argument('--checkpoint', type=Path, required=True)
+    smoldiagnose.add_argument('--output', type=Path, required=True)
+    smoldiagnose.add_argument('--samples', type=int, default=20)
+    smoldiagnose.add_argument('--seed', type=int, default=42)
+    smoldiagnose.add_argument('--device', choices=['cpu', 'cuda'], default='cuda')
     collect = sub.add_parser('collect', help='Section 1: keyboard demonstration collection')
     collect.add_argument('--dataset', type=Path, default=None)
     collect.add_argument('--episodes', type=int, default=1)
@@ -226,7 +270,8 @@ def scripted_collect(args):
     dataset = create_dataset(root)
     env = None
     report = {'mode': 'scripted_ik', 'seed': args.seed, 'saved_episodes': 0,
-              'not_a_learned_policy': True, 'fps': 20}
+              'not_a_learned_policy': True, 'fps': 20, 'state_type': 'ee_pose',
+              'action_type': 'absolute_joint_targets', 'observation_timing': 'before_command'}
     frames = 0
     preview = []
     phase_starts = {}
@@ -282,6 +327,20 @@ def main():
     args = parser().parse_args()
     if args.command == 'doctor':
         doctor()
+    elif args.command in ('train-smolvla', 'deploy-smolvla', 'diagnose-smolvla'):
+        from . import smolvla
+        {'train-smolvla': smolvla.train, 'deploy-smolvla': smolvla.deploy,
+         'diagnose-smolvla': smolvla.diagnose}[args.command](args)
+    elif args.command in ('collect-language', 'replay-language', 'audit-language'):
+        from . import language
+        if args.command == 'collect-language':
+            if args.headless and not args.scripted:
+                raise ValueError('Keyboard collection requires a window; remove --headless or use --scripted.')
+            language.collect(args)
+        elif args.command == 'replay-language':
+            language.replay(args)
+        else:
+            language.audit(args)
     elif args.command == 'collect':
         collect(args)
     elif args.command == 'smoke':

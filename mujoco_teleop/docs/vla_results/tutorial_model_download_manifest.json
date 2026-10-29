@@ -1,0 +1,86 @@
+[
+  {
+    "repo_id": "Jeongeun/omy_pnp_smolvla",
+    "revision": "738e2cb9235562d58842ceb8a9469ae21278bb53",
+    "files": [
+      {
+        "path": "config.json",
+        "bytes": 2003,
+        "lfs": null
+      },
+      {
+        "path": "model.safetensors",
+        "bytes": 1197790032,
+        "lfs": {
+          "size": 1197790032,
+          "sha256": "4235525664c29c9fd6c8c02fe2d87731cfa1237dc8f109736c03f2ec9725f186",
+          "pointer_size": 135
+        },
+        "verified_sha256": "4235525664c29c9fd6c8c02fe2d87731cfa1237dc8f109736c03f2ec9725f186"
+      }
+    ],
+    "local_dir": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\.downloads\\models\\omy_pnp_smolvla"
+  },
+  {
+    "repo_id": "HuggingFaceTB/SmolVLM2-500M-Video-Instruct",
+    "revision": "7b375e1b73b11138ff12fe22c8f2822d8fe03467",
+    "files": [
+      {
+        "path": "added_tokens.json",
+        "bytes": 4739,
+        "lfs": null
+      },
+      {
+        "path": "chat_template.json",
+        "bytes": 430,
+        "lfs": null
+      },
+      {
+        "path": "config.json",
+        "bytes": 3767,
+        "lfs": null
+      },
+      {
+        "path": "generation_config.json",
+        "bytes": 136,
+        "lfs": null
+      },
+      {
+        "path": "merges.txt",
+        "bytes": 466391,
+        "lfs": null
+      },
+      {
+        "path": "preprocessor_config.json",
+        "bytes": 599,
+        "lfs": null
+      },
+      {
+        "path": "processor_config.json",
+        "bytes": 67,
+        "lfs": null
+      },
+      {
+        "path": "special_tokens_map.json",
+        "bytes": 868,
+        "lfs": null
+      },
+      {
+        "path": "tokenizer.json",
+        "bytes": 3548256,
+        "lfs": null
+      },
+      {
+        "path": "tokenizer_config.json",
+        "bytes": 28626,
+        "lfs": null
+      },
+      {
+        "path": "vocab.json",
+        "bytes": 800662,
+        "lfs": null
+      }
+    ],
+    "local_dir": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\.downloads\\models\\SmolVLM2-500M-Video-Instruct"
+  }
+]

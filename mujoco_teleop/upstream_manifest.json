@@ -1,12 +1,22 @@
 {
   "repository": "datawhalechina/every-embodied",
   "commit": "14d7c6c93debf01419b21e50b649a06f15881c38",
-  "path": "06-\u7b56\u7565\u6293\u53d6\u6216\u6293\u53d6VLA/\u5927\u6a21\u578b\u63a7\u5236\u3001VLA\u3001VLM/04mujoco\u590d\u73b0ACT\u3001Pi0\u3001SmolVLA/",
+  "path": "06-策略抓取或抓取VLA/大模型控制、VLA、VLM/04mujoco复现ACT、Pi0、SmolVLA/",
   "files": [
+    {
+      "path": "09策略诊断与物理成功评估.md",
+      "sha": "03b8da448f64cfc71a195acf46671d11c964b7d5",
+      "size": 7425
+    },
     {
       "path": "1.collect_data.ipynb",
       "sha": "a2c0071b9ee4ae9e6b0c2f856fb887fe8d4ef3f2",
       "size": 23529
+    },
+    {
+      "path": "10.pi05_omy.ipynb",
+      "sha": "c86ff5c30fee29915266d0698d00520e01f74950",
+      "size": 36536
     },
     {
       "path": "2.visualize_data-omy.ipynb",
@@ -14,14 +24,54 @@
       "size": 17179
     },
     {
-      "path": "README.md",
-      "sha": "dd5a6caa449dae89a258f687367d226bdb3397af",
-      "size": 14741
+      "path": "3.train.ipynb",
+      "size": 228602,
+      "sha": "972c91df5de5a9a47af11cf90a4a3662c6420f11"
+    },
+    {
+      "path": "4.deploy.ipynb",
+      "size": 27294,
+      "sha": "a5829e2aa0aee1e5bbe99f77930cb531bc3cb5ad"
+    },
+    {
+      "path": "5.language_env.ipynb",
+      "sha": "6a84c863b3c3e5959617f117af56227c69091129",
+      "size": 26204
+    },
+    {
+      "path": "6.visualize_data.ipynb",
+      "sha": "6aea8b7d10ec890b73ad6b59a59214224edf5a13",
+      "size": 553451
+    },
+    {
+      "path": "7.pi0.ipynb",
+      "sha": "940e7e6d731c6b916081187c170c580eee92582e",
+      "size": 42757
+    },
+    {
+      "path": "8.smolvla.ipynb",
+      "sha": "c4eb05b3a96664d386197c6c021a8bb6088addb7",
+      "size": 42659
+    },
+    {
+      "path": "9.teleop_xr-纯环境.ipynb",
+      "sha": "8535b0d9c4af02453a5462c8a1ee78e3017670a8",
+      "size": 528304
+    },
+    {
+      "path": "9.teleop_xr.ipynb",
+      "sha": "1c82de83f81701ba38bf00306c0b2e9b410c0518",
+      "size": 537094
     },
     {
       "path": "asset/example_scene_y.xml",
       "sha": "572c0e6ac416c44b65bcfd84602f08948d565402",
       "size": 1254
+    },
+    {
+      "path": "asset/example_scene_y2.xml",
+      "sha": "012ebc0dc400300799404a5ca82bec53193779a4",
+      "size": 1245
     },
     {
       "path": "asset/objaverse/mug_5/collision/model_normalized_collision_0.obj",
@@ -184,19 +234,14 @@
       "size": 3066
     },
     {
-      "path": "asset/objaverse/mug_5/model.xml",
-      "sha": "276ef96185f0754704600326563b5775f05d53a4",
-      "size": 14364
-    },
-    {
       "path": "asset/objaverse/mug_5/model_new.xml",
       "sha": "85ad8c1f2f880d86a31ddba80145455e348b9853",
       "size": 13020
     },
     {
-      "path": "asset/objaverse/mug_5/visual/image0.png",
-      "sha": "ead6c0855b3fd27a02264333f6346d6c9afd5a09",
-      "size": 72339
+      "path": "asset/objaverse/mug_5/model.xml",
+      "sha": "276ef96185f0754704600326563b5775f05d53a4",
+      "size": 14364
     },
     {
       "path": "asset/objaverse/mug_5/visual/image0_changed.png",
@@ -204,9 +249,9 @@
       "size": 23704
     },
     {
-      "path": "asset/objaverse/mug_5/visual/material.mtl",
-      "sha": "6b5d0f127cc1df2efd6b4835e0300358bb6dde72",
-      "size": 200
+      "path": "asset/objaverse/mug_5/visual/image0.png",
+      "sha": "ead6c0855b3fd27a02264333f6346d6c9afd5a09",
+      "size": 72339
     },
     {
       "path": "asset/objaverse/mug_5/visual/material_0.png",
@@ -214,7 +259,197 @@
       "size": 72339
     },
     {
+      "path": "asset/objaverse/mug_5/visual/material.mtl",
+      "sha": "6b5d0f127cc1df2efd6b4835e0300358bb6dde72",
+      "size": 200
+    },
+    {
       "path": "asset/objaverse/mug_5/visual/model_normalized_0.obj",
+      "sha": "c9ef82b91fa9fc623723b6af46a7c54107b79f11",
+      "size": 348751
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_0.obj",
+      "sha": "1fe02da831dfcc4783a5b7a0455c6029de408e61",
+      "size": 2033
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_1.obj",
+      "sha": "2026a32543e2532a659d23cfc8d6a5bbd73219ec",
+      "size": 2626
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_10.obj",
+      "sha": "4383567bb7fe7ff87419e2799921157ef66b080c",
+      "size": 1927
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_11.obj",
+      "sha": "78a2d25ad1a7c82cea8bd39160b4209655af3412",
+      "size": 2124
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_12.obj",
+      "sha": "ac7e19602b84154ebf01ab6eba7afd550f77acc2",
+      "size": 2209
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_13.obj",
+      "sha": "9061b8b3593babdbf6118a08cbb691df00559817",
+      "size": 2511
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_14.obj",
+      "sha": "2cffcc7781bc8fabf5e82d029367dbc50ec2117d",
+      "size": 1314
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_15.obj",
+      "sha": "390b9776aefe5d7a31201b0a8cffa083832450b9",
+      "size": 3409
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_16.obj",
+      "sha": "fcbb2de3c0da5bd57d85bdfe8c00e2fb6b394909",
+      "size": 1649
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_17.obj",
+      "sha": "b7eb8973431b0d52f06af9f041ea57cde92b2763",
+      "size": 1431
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_18.obj",
+      "sha": "a42361265c19ae0855417cc1be20cb1447d7e1d5",
+      "size": 1791
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_19.obj",
+      "sha": "a2ae5dcf1955eb8c8d856d0bbc39d574a624ae6a",
+      "size": 1880
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_2.obj",
+      "sha": "aaab045a2b5337df4e3fc327fa53b1d6fe87d39e",
+      "size": 2120
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_20.obj",
+      "sha": "f57541ee4a744bf62bf74535a0639d6c040769a0",
+      "size": 1990
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_21.obj",
+      "sha": "a863a26df00891e1fafaae6d193c4e5f10965359",
+      "size": 2576
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_22.obj",
+      "sha": "de3e808efd4948f5f1949f4756ca7709bfbedf7b",
+      "size": 3596
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_23.obj",
+      "sha": "488a2f1a68ada99f300f2ef2d1a85e6e3198e49c",
+      "size": 1871
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_24.obj",
+      "sha": "739b97ca26099da6b31bef4ce3ca0c1c245a437c",
+      "size": 1299
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_25.obj",
+      "sha": "f0cddbb8bd57a4f8f0ae91f19024fedb93c75281",
+      "size": 1898
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_26.obj",
+      "sha": "501fe0d11f8d2dd5af0f9637161e82b2d5a08021",
+      "size": 1819
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_27.obj",
+      "sha": "48805efb71cdea9b47e817382c59cf828fd06155",
+      "size": 2060
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_28.obj",
+      "sha": "ea0e141ccc6a5816e70f4c8f472d74c31524863b",
+      "size": 2179
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_29.obj",
+      "sha": "f93e3059698fd2240b91beb30e3924561a079d6e",
+      "size": 1206
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_3.obj",
+      "sha": "0694bdf17750552de6ff1b62851d4ead7af03e8f",
+      "size": 3717
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_30.obj",
+      "sha": "8438bdd73d1d333e6ee4013b6cdebff25bd46814",
+      "size": 652
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_31.obj",
+      "sha": "351fc7e4183cd630ed7486aa66739bc021157cc8",
+      "size": 1546
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_4.obj",
+      "sha": "f05da66c016497fc90de7ba0824628b971096bc9",
+      "size": 2075
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_5.obj",
+      "sha": "dec4b8246f42085f677f3729cb9c7d92d05c6e2a",
+      "size": 2329
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_6.obj",
+      "sha": "5fef15298e34e6787d4af2fad91aec72d6dee38b",
+      "size": 1881
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_7.obj",
+      "sha": "236d789d33854a20ebee1f83d25a9e0570f0023b",
+      "size": 767
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_8.obj",
+      "sha": "c8a073516ef1bfe8645e1c29eac3f7fef75beb48",
+      "size": 3609
+    },
+    {
+      "path": "asset/objaverse/mug_6/collision/model_normalized_collision_9.obj",
+      "sha": "a38af1e6b37c0ace52bfe1578bb05b0942c259b3",
+      "size": 3066
+    },
+    {
+      "path": "asset/objaverse/mug_6/model_new.xml",
+      "sha": "a64996237e93fa26db5ff02fbfd727f3a1c68df5",
+      "size": 13020
+    },
+    {
+      "path": "asset/objaverse/mug_6/model.xml",
+      "sha": "276ef96185f0754704600326563b5775f05d53a4",
+      "size": 14364
+    },
+    {
+      "path": "asset/objaverse/mug_6/visual/image0.png",
+      "sha": "b3e6ea2d3601b24fa20b5779cef1c6c696f41321",
+      "size": 23704
+    },
+    {
+      "path": "asset/objaverse/mug_6/visual/material.mtl",
+      "sha": "6b5d0f127cc1df2efd6b4835e0300358bb6dde72",
+      "size": 200
+    },
+    {
+      "path": "asset/objaverse/mug_6/visual/model_normalized_0.obj",
       "sha": "c9ef82b91fa9fc623723b6af46a7c54107b79f11",
       "size": 348751
     },
@@ -224,14 +459,14 @@
       "size": 13119540
     },
     {
-      "path": "asset/robotis_omy/assets/base.stl",
-      "sha": "35d8431fbd9838e963fbc64e34c06287e2064130",
-      "size": 24884
-    },
-    {
       "path": "asset/robotis_omy/assets/base_unit.stl",
       "sha": "ac34fc0c613d8ef24d7494871ef5a2b60c9227a3",
       "size": 4798984
+    },
+    {
+      "path": "asset/robotis_omy/assets/base.stl",
+      "sha": "35d8431fbd9838e963fbc64e34c06287e2064130",
+      "size": 24884
     },
     {
       "path": "asset/robotis_omy/assets/flange.stl",
@@ -324,6 +559,16 @@
       "size": 1366
     },
     {
+      "path": "check_training_configs.py",
+      "sha": "fdde707787d060e7e94523a1ab958fe000ae11da",
+      "size": 1109
+    },
+    {
+      "path": "env_config.py",
+      "sha": "04789299afd0c8f43a057b0077fc5ac3fc880c5b",
+      "size": 1445
+    },
+    {
       "path": "mujoco_env/__init__.py",
       "sha": "03162b0a24221c260c312cb4647cb141e1e14596",
       "size": 44
@@ -354,24 +599,74 @@
       "size": 42194
     },
     {
+      "path": "mujoco_env/y_env2.py",
+      "sha": "d7c0ee1797be2a579c492d118bc6b2d92361d87d",
+      "size": 15697
+    },
+    {
+      "path": "pi0_datawhale_eai.yaml",
+      "sha": "62c8573315e095d85e74e28aa0425956b99df9ea",
+      "size": 451
+    },
+    {
+      "path": "pi0_omy.yaml",
+      "sha": "f583793fb29c26b027aa3bb202ac52666d03b306",
+      "size": 577
+    },
+    {
+      "path": "pi05_omy_short_check.md",
+      "sha": "ce62fa9f70f87d21de4644751b9680454b797b3a",
+      "size": 5198
+    },
+    {
+      "path": "pi05_omy_train.py",
+      "sha": "399e85b6cea0b0ac086886360717d4fdf8c5c997",
+      "size": 1461
+    },
+    {
+      "path": "pi05_omy_utils.py",
+      "sha": "2f8efd34c6dd9077b09c61a5a1b571084870dc91",
+      "size": 16563
+    },
+    {
+      "path": "README.md",
+      "sha": "dd5a6caa449dae89a258f687367d226bdb3397af",
+      "size": 14741
+    },
+    {
+      "path": "requirements_pi05.txt",
+      "sha": "b20564767a1c0a260fa2011df4fd358aa0560fde",
+      "size": 373
+    },
+    {
       "path": "requirements.txt",
       "sha": "012681a01b38e8f1d05220d131f0493663556916",
       "size": 402
     },
     {
-      "path": "env_config.py",
-      "sha": "04789299afd0c8f43a057b0077fc5ac3fc880c5b",
-      "size": 1445
+      "path": "smolvla_datawhale_eai.yaml",
+      "sha": "5741cef20c63d1f4ed84c3c065eca76ff969c267",
+      "size": 463
     },
     {
-      "path": "3.train.ipynb",
-      "size": 228602,
-      "sha": "972c91df5de5a9a47af11cf90a4a3662c6420f11"
+      "path": "smolvla_omy.yaml",
+      "sha": "994f4f2258a6a4def1a166c7489c286ecf8897a7",
+      "size": 608
     },
     {
-      "path": "4.deploy.ipynb",
-      "size": 27294,
-      "sha": "a5829e2aa0aee1e5bbe99f77930cb531bc3cb5ad"
+      "path": "test_collection_actions.py",
+      "sha": "15e016e696b8cf16d9b38d23444d4b37da93ca0a",
+      "size": 12716
+    },
+    {
+      "path": "test_pi05_omy.py",
+      "sha": "9f6d641b7806865933b8ebcdf88b570d0e7d4df8",
+      "size": 9595
+    },
+    {
+      "path": "train_model.py",
+      "sha": "e19fed2fc005b04238b0b2b9922212d8f49fa3e6",
+      "size": 10973
     }
   ]
 }

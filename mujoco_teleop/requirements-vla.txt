@@ -1,0 +1,8 @@
+# Keep the ACT environment intact: install additions into project .deps.
+transformers==4.50.3
+tokenizers==0.21.4
+accelerate==1.7.0
+num2words==0.5.14
+docopt==0.6.2
+sentencepiece==0.2.0
+regex==2024.11.6

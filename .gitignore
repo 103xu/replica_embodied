@@ -4,6 +4,8 @@ __pycache__/
 .pytest_cache/
 .ipynb_checkpoints/
 .venv/
+.venv-pi05/
+.hf3/
 .DS_Store
 
 # Reproduction dependencies and large generated data

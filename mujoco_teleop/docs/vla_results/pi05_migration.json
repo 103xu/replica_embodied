@@ -1,0 +1,18 @@
+{
+  "source": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\data\\pi05_single_001",
+  "lerobot_version": "0.6.1",
+  "fps": 20,
+  "state_kind": "eef_pose",
+  "action_kind": "absolute_joint_targets",
+  "labels_verified": true,
+  "split_seed": 42,
+  "train_episodes": [
+    0
+  ],
+  "heldout_episodes": [],
+  "normalization_episodes": [
+    0
+  ],
+  "total_frames": 602,
+  "repo_id": "local/omy-pi05"
+}

@@ -1,8 +1,12 @@
-# OMY 示教采集、回放与 ACT 训练部署（Every-Embodied 第 1～4 部分）
+# OMY 示教、ACT 与 VLA 本机复现（Every-Embodied 第 1～10 部分）
+
+**第一次动手学习，请从 [个人自学练习册](docs/LEARNER_GUIDE.md) 开始。** 它按参考教程顺序讲解命令、预期现象和每一步的作用，直接调用 my_env 的 Python，适用于 PowerShell 禁止运行 `.ps1` 的情况。本 README 保留参数与工程说明。
 
 在 Windows 上复现 OMY 六轴机械臂的键盘示教采集和动作回放。使用教程原始机械臂、杯子、盘子、场景与逆运动学代码；提供独立 Python/PowerShell 入口，避免 Notebook 的工作目录、Windows 多进程和误删数据问题。
 
-本项目范围：第 1 部分采集示教、第 2 部分回放数据、第 3 部分 ACT 训练、第 4 部分 ACT 仿真部署。**不包含 SmolVLA 训练或真机控制。** ACT 是视觉模仿学习策略，本实验不加入语言理解。
+当前实现：第 1～4 部分的 ACT 采集、回放、训练和部署；第 5～6 部分的双杯语言数据；第 8 部分 SmolVLA 预训练加载、微调与部署；第 9 部分数据/策略诊断；第 10 部分 π0.5 数据转换与接口测试。**π0、π0.5 完整模型训练及 XR 遥操作尚未完成，也不包含真机控制。** ACT 基线不使用语言，SmolVLA 使用图像、关节状态和任务文字。
+
+进度与证据见 [VLA 复现记录](docs/VLA_REPRODUCTION_LOG.md)。训练程序结束、保存权重与实际抓放成功分别记录。
 
 另提供 `auto-demo`：以确定性 IK 脚本执行一次抓杯、抬升、搬运、放下，再保存实际仿真轨迹，方便无需手工操作就验证第 1、2 部分。它不是训练出来的 VLA 策略，也不是人类键盘示教。
 
@@ -20,7 +24,7 @@
 
 使用已有 `my_env` 的 Python 3.10，不使用 base 的 Python 3.14。检测到 NVIDIA RTX 5060 Laptop GPU（约 8 GB 显存），保留已有 PyTorch `2.14.0+cu130` 与 torchvision `0.29.0+cu130`。第 1、2 部分不需要 GPU 训练；第 3、4 部分默认使用 CUDA。
 
-旧版 LeRobot 需要旧版 `datasets/fsspec`。为保留用户环境，新增依赖安装在本项目 `.deps/` 中，由 `run.py` 启动时加载。**没有新建虚拟环境，也不把项目依赖安装进 base/my_env 的 site-packages。** 普通终端直接 `import mujoco` 不会加载 `.deps`，请使用下述入口。
+旧版 LeRobot 需要旧版 `datasets/fsspec`。为保留用户环境，第 1～9 部分新增依赖安装在本项目 `.deps/` 中，由 `run.py` 启动时加载，不安装进 base/my_env 的 site-packages。第 10 部分的数据测试单独使用 `.venv-pi05`，避免升级旧版 LeRobot。普通终端直接 `import mujoco` 不会加载 `.deps`，请使用项目入口。
 
 `environment-before.json` 保存复现前 my_env 的包版本；`.deps` 不进入 Git。克隆项目后需要运行安装脚本，项目内的模型、源码会随 Git 保留。
 
@@ -209,6 +213,72 @@
 
 训练权重约 206 MB，留在本机 `checkpoints/`，不直接提交到 GitHub；新机器需要先训练或复制完整 checkpoint 目录再部署。
 
+## 第 5～10 部分：语言数据、SmolVLA、诊断与 π0.5 数据准备
+
+以下在仓库根目录的 PowerShell 执行，直接调用 Python，适用于系统禁止 `.ps1` 的情况。初学者请优先跟随 [个人练习册](docs/LEARNER_GUIDE.md)；本节是命令索引。
+
+```powershell
+$PythonExe = "C:\Users\32010\Apps\Anaconda\envs\my_env\python.exe"
+$RunTag = Get-Date -Format "yyyyMMdd_HHmmss"
+$LanguageData = ".\mujoco_teleop\data\language_demo_020"
+$SmolRun = ".\mujoco_teleop\checkpoints\smol_$RunTag"
+```
+
+### 5、6：双杯语言数据
+
+本机已有 `language_demo_020`（20 条、12,782 帧），可以直接回放。新克隆缺少数据时，先在新目录采集：
+
+```powershell
+# 只在 $LanguageData 不存在时运行；已有数据时更换 --dataset，避免覆盖。
+& $PythonExe .\mujoco_teleop\run.py collect-language --dataset $LanguageData --episodes 20 --scripted --headless --fast
+& $PythonExe .\mujoco_teleop\run.py replay-language --dataset $LanguageData --episode 0 --output ".\mujoco_teleop\outputs\red_$RunTag"
+& $PythonExe .\mujoco_teleop\run.py replay-language --dataset $LanguageData --episode 1 --output ".\mujoco_teleop\outputs\blue_$RunTag"
+```
+
+去掉采集命令的 `--scripted` 可做键盘示教；键盘模式不能使用 `--headless`。双杯状态是关节角，不能与旧 ACT 末端位姿数据混用。20 条均能按标签重放，但竖直放置的物理审计只有 12/20，通过采集判定不等于示教质量合格。
+
+### 7：π0 预检查
+
+```powershell
+& $PythonExe .\mujoco_teleop\scripts\check_vla.py --online --output ".\mujoco_teleop\outputs\vla_check_$RunTag.json"
+```
+
+只做配置、资源与公开访问检查，不下载大模型或训练。π0 完整训练未在本机通过，PaliGemma 匿名配置请求返回 401；当前不提供声称可直接成功的本机训练命令。
+
+### 8：SmolVLA
+
+```powershell
+& $PythonExe .\mujoco_teleop\scripts\prepare_vla.py
+& $PythonExe .\mujoco_teleop\run.py train-smolvla --dataset $LanguageData --output $SmolRun --steps 2000 --batch-size 1 --holdout-episodes 2 --log-every 100
+& $PythonExe .\mujoco_teleop\run.py deploy-smolvla --checkpoint "$SmolRun\final" --output ".\mujoco_teleop\outputs\smol_$RunTag" --max-steps 1000
+```
+
+首次联网下载固定版本 SmolVLA 权重及骨干配置/分词器，附加依赖仍放 `.deps`。训练严格匹配全部核心预训练参数，按训练回合重新计算归一化。`--steps 5 --log-every 1` 可先做短检查；上游原配置为 20,000 步、batch=16，本机例子是较短练习配置。
+
+部署依次测试红/蓝指令，输出 JSON、逐帧日志、相机图和 GIF。当前 2,000 步基线已经完成训练和严格重新加载，但实际部署 0/2 成功；后续长窗口实验见复现记录。权重、数据和 `.deps` 不随 Git 上传。
+
+### 9：数据与策略诊断
+
+```powershell
+& $PythonExe .\mujoco_teleop\run.py audit-language --dataset $LanguageData --output ".\mujoco_teleop\outputs\audit_$RunTag.json"
+& $PythonExe .\mujoco_teleop\run.py diagnose-smolvla --dataset $LanguageData --checkpoint "$SmolRun\final" --output ".\mujoco_teleop\outputs\diagnose_$RunTag.json" --samples 20
+```
+
+前者用物理仿真重放所有标签并检查倒杯；后者检查离线动作误差和固定图像/噪声下的指令对照。文字改变能使动作改变，不等于模型选对杯子。XR Notebook 另有设备与 TeleopXR 依赖，当前只保存原文件，未执行。
+
+### 10：π0.5 数据接口（独立 CPU 环境）
+
+```powershell
+# 当前机器已准备好；新机器恢复时执行。使用已有 uv，环境单独放项目内。
+& $PythonExe .\mujoco_teleop\scripts\prepare_pi05.py
+& .\mujoco_teleop\.venv-pi05\Scripts\python.exe .\mujoco_teleop\scripts\pi05_data.py test
+
+# --source 必须是已回放的单杯末端位姿数据；本机已有 pi05_single_001。
+& .\mujoco_teleop\.venv-pi05\Scripts\python.exe .\mujoco_teleop\scripts\pi05_data.py prepare --source .\mujoco_teleop\data\pi05_single_001 --destination ".\mujoco_teleop\data\pi05_v3_$RunTag" --labels-verified
+```
+
+实际 6 项上游测试和 602 帧数据转换/50 步窗口对齐通过。该 CPU 环境仅验证数据与接口；没有 π0.5 GPU 微调。上游五步训练曾使用 12.85GiB 分配显存，超过本机约 8GB，用户暂时没有服务器。
+
 ## 新机器安装 / 恢复依赖
 
 需要 Python 3.10 和可用的 PyTorch / torchvision。现有机器的 GPU 版 PyTorch 沿用用户环境，不在本章安装脚本中替换。安装脚本优先读取实际安装后生成的 `requirements-lock.txt`；`requirements.txt` 说明直接依赖，LeRobot 另外按固定提交安装。
@@ -244,6 +314,8 @@ mujoco_teleop/
   README.md                    安装、操作、数据格式与限制
   run.py / run.ps1             启动入口
   requirements.txt            第 1、2 部分的直接依赖
+  requirements-vla.txt        旧版 SmolVLA 附加依赖
+  requirements-pi05-cpu.lock.txt  独立 v3 数据测试环境锁文件
   upstream_manifest.json      固定上游版本和原始资源校验值
   environment-before.json     原有环境快照
   scripts/                    依赖安装、上游资源获取
@@ -252,6 +324,7 @@ mujoco_teleop/
   vendor/every_embodied/       原始 Notebook、环境代码、OMY/杯盘模型
   docs/                       复现日志、验证结果
   .deps/                      本地依赖，Git 忽略
+  .venv-pi05/                 独立 Python 3.12 CPU 数据测试环境，Git 忽略
   .downloads/                 下载和运行缓存，Git 忽略
   data/                       采集数据，Git 忽略
   outputs/                    回放报告和截图，Git 忽略
@@ -260,5 +333,7 @@ mujoco_teleop/
 本次工作在 `codex/omy-collection-replay` 分支开发，并按用户要求上传到 `103xu/replica_embodied`。较大的示教、运行缓存不进入 Git，源码和必要模型资源保留在本仓库中。原有 `mujoco_demo/` 保持原样。
 
 第 3、4 部分在 `codex/act-training-deployment` 分支继续开发。采集/回放、ACT 和 GUI 相机一致性共 11 项检查通过；实际部署结果单独记录，不以单元测试通过替代抓放成功判定。
+
+第 5～10 部分在 `codex/vla-local-reproduction` 分支继续开发，当前新增命令与证据见上文。第 10 部分的严格加载单元测试使用模拟类检查失败处理；本机未加载完整 π0.5 模型。
 
 盘子的原始 OBJ 网格较大，因此 Git 保留上游的 `plate_11.zip`，解压目录通过 `.gitignore` 排除；当前本机保留解压后的完整模型，首次从 Git 克隆运行时会自动离线解压，不需要重新下载。这样避免直接提交大型原始网格。

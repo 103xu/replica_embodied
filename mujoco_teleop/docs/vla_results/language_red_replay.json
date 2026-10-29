@@ -1,0 +1,17 @@
+{
+  "dataset": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\data\\language_demo_020",
+  "episode": 0,
+  "instruction": "Place the red mug on the plate.",
+  "complete": true,
+  "frames": 583,
+  "state_type": "joint_angle",
+  "max_next_joint_state_error_rad": 0.0,
+  "target": "body_obj_mug_5",
+  "target_xy_distance_m": 0.011252080534770685,
+  "target_z_distance_m": 0.04474016097854139,
+  "target_up_cosine": 0.9997412274089681,
+  "upright": true,
+  "legacy_success": true,
+  "mug_lift_height_m": 0.19501281606273413,
+  "strict_success": true
+}
