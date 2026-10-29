@@ -36,6 +36,11 @@ def main():
                         '-r', str(ROOT / 'requirements-vla.txt')], check=True,
                        env=dict(os.environ, PIP_CACHE_DIR=str(cache / 'pip-cache')))
     sys.path.insert(0, str(ROOT / '.deps'))
+    if not args.inspect_only:
+        # Keep the upstream vendor immutable; repair only the known type import
+        # in the separately installed pinned LeRobot copy.
+        from repair_pi0_import import repair
+        print(json.dumps({'pi0_import_patch': repair(ROOT / '.deps')}), flush=True)
     from huggingface_hub import HfApi, snapshot_download
     repos = ['lerobot/smolvla_base', 'HuggingFaceTB/SmolVLM2-500M-Video-Instruct'] if args.model == 'smolvla' else ['lerobot/pi0']
     if args.tutorial_checkpoint:

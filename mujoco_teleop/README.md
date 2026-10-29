@@ -8,6 +8,8 @@
 
 进度与证据见 [VLA 复现记录](docs/VLA_REPRODUCTION_LOG.md)。训练程序结束、保存权重与实际抓放成功分别记录。
 
+最新复查：[代码复查与 π 模型诊断](docs/RECHECK_REPORT.md)。π0 的类型导入问题已修复；PaliGemma 授权、显存，以及 π0.5 的 CPU 环境和 Windows 依赖冲突分别检查，不再只用 YAML 解析通过代表模型可运行。
+
 另提供 `auto-demo`：以确定性 IK 脚本执行一次抓杯、抬升、搬运、放下，再保存实际仿真轨迹，方便无需手工操作就验证第 1、2 部分。它不是训练出来的 VLA 策略，也不是人类键盘示教。
 
 ## 来源与版本
@@ -247,6 +249,8 @@ $SmolRun = ".\mujoco_teleop\checkpoints\smol_$RunTag"
 
 只做配置、资源与公开访问检查，不下载大模型或训练。π0 完整训练未在本机通过，PaliGemma 匿名配置请求返回 401；当前不提供声称可直接成功的本机训练命令。
 
+新检查还会真正导入 π0 模型并在 meta 设备统计参数。固定版错误的 `pytest.Cache` 导入由 `scripts/repair_pi0_import.py` 修正，`prepare_vla.py` 会自动应用。当前 π0 默认训练的权重/梯度/Adam 估算约 22.83GiB，动作专家配置约 8.80GiB，不含激活；本机 7.93GiB。π0.5 独立环境为 CPU 数据环境，缺少模型 extras；原上游 `torchcodec==0.4.0` 与 Windows 的 `>=0.7.0` 要求也冲突。具体证据见复查报告。
+
 ### 8：SmolVLA
 
 ```powershell
@@ -321,6 +325,14 @@ $SmolRun = ".\mujoco_teleop\checkpoints\smol_$RunTag"
 检查现存数据保护、动作标签语义、完整积分状态恢复、IK 的物理副作用以及 Parquet 图像/动作的保存与读取。
 
 ## 文件布局与 Git 管理
+
+需要重新检查全部主要链路时，可使用下列命令（当前本机已保留所需预训练文件）：
+
+```powershell
+& "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe" .\mujoco_teleop\scripts\recheck.py
+```
+
+每次创建新的输出目录，运行旧演示、测试、采集/回放、ACT 和 SmolVLA 的实际短步训练与重新加载、发布模型抓放、π0.5 数据转换和 π 模型就绪检查。短步训练只检查程序链路，不代替原长训练或自训模型的任务评测。π 模型检查通过执行也不等于已经能训练，须查看报告里的就绪字段。
 
 ```text
 mujoco_teleop/

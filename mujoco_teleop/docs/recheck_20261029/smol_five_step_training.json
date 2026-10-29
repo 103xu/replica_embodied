@@ -1,0 +1,41 @@
+{
+  "policy": "SmolVLA",
+  "complete": true,
+  "steps": 5,
+  "batch_size": 1,
+  "chunk_size": 5,
+  "learning_rate": 0.0001,
+  "seed": 42,
+  "dataset": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\outputs\\recheck_20261029\\language_data",
+  "dataset_sha256": "11b8021dd147ca66f0093158647015f97fdaa1bda61e669ada1243c5712fdd28",
+  "episodes": 2,
+  "frames": 1278,
+  "holdout_episodes": 0,
+  "training_frames": 1278,
+  "evaluation_frames": 0,
+  "pretrained": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\.downloads\\models\\smolvla_base",
+  "transfer": {
+    "core_tensors_loaded": 500,
+    "tied_aliases": [],
+    "normalization": "OMY training episodes only; base robot statistics not reused"
+  },
+  "heldout_loss_probe_frames": 0,
+  "heldout_loss_is_full_eval": false,
+  "trainable_parameters": 99880992,
+  "uses_language": true,
+  "state_type": "joint_angle",
+  "action_type": "absolute_joint_targets",
+  "device": "cuda",
+  "parameter_checks": {
+    "model.action_out_proj.weight": {
+      "changed_elements": 23040,
+      "maximum_change": 0.0004969993606209755
+    },
+    "model.vlm_with_expert.vlm.model.vision_model.embeddings.patch_embedding.weight": {
+      "changed_elements": 0,
+      "maximum_change": 0.0
+    }
+  },
+  "elapsed_seconds": 18.020823700004257,
+  "peak_cuda_mib": 2038.28662109375
+}

@@ -3,6 +3,8 @@
 
 自学入口：[从机械臂示教到理解 VLA 的个人练习册](mujoco_teleop/docs/LEARNER_GUIDE.md)（按教程顺序，包含可执行命令、预期效果和原理解释）。
 
+最新检查：[整体复跑结果与 π 模型训练阻塞原因](mujoco_teleop/docs/RECHECK_REPORT.md)（真实导入、授权、显存估算和 Windows 依赖解析）。
+
 ## 现在已有项目
 - [x] 初识 mujoco 的 demo → [`mujoco_demo/`](mujoco_demo/)（UR 机械臂 + 夹爪抓取演示，安装与运行说明见 [mujoco_demo/README.md](mujoco_demo/README.md)）
 - [x] OMY 示教采集与回放 → [`mujoco_teleop/`](mujoco_teleop/)（Every-Embodied 第 1、2 部分）

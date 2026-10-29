@@ -1,0 +1,44 @@
+{
+  "dataset": "C:\\Users\\32010\\GitHub\\replica_embodied\\mujoco_teleop\\outputs\\recheck_20261029\\language_data",
+  "uses_learned_policy": false,
+  "episodes": [
+    {
+      "episode": 0,
+      "instruction": "Place the red mug on the plate.",
+      "frames": 583,
+      "max_next_joint_state_error_rad": 0.0,
+      "lift_ticks_above_3cm": 228,
+      "max_consecutive_lift_ticks": 228,
+      "target": "body_obj_mug_5",
+      "target_xy_distance_m": 0.011252080534770685,
+      "target_z_distance_m": 0.04474016097854139,
+      "target_up_cosine": 0.9997412274089681,
+      "upright": true,
+      "legacy_success": true,
+      "mug_lift_height_m": 0.19501281606273413,
+      "strict_success": true,
+      "physical_success": true
+    },
+    {
+      "episode": 1,
+      "instruction": "Place the blue mug on the plate.",
+      "frames": 695,
+      "max_next_joint_state_error_rad": 0.0,
+      "lift_ticks_above_3cm": 287,
+      "max_consecutive_lift_ticks": 287,
+      "target": "body_obj_mug_6",
+      "target_xy_distance_m": 0.07406087997082937,
+      "target_z_distance_m": 0.03383817252295429,
+      "target_up_cosine": 0.2790258481896016,
+      "upright": false,
+      "legacy_success": true,
+      "mug_lift_height_m": 0.20516062237343013,
+      "strict_success": true,
+      "physical_success": false
+    }
+  ],
+  "strict_successes": 2,
+  "physical_successes": 1,
+  "physical_rule": "legacy success + lift >=3cm for >=3 ticks + final up-axis cosine >=0.85",
+  "max_next_joint_state_error_rad": 0.0
+}

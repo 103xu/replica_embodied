@@ -8,7 +8,7 @@ import time
 
 
 def parser():
-    p = argparse.ArgumentParser(description='Every-Embodied OMY sections 1-2: collect and replay')
+    p = argparse.ArgumentParser(description='Every-Embodied OMY: data, ACT, VLA and physical diagnostics')
     sub = p.add_subparsers(dest='command', required=True)
     sub.add_parser('doctor', help='Report the active Python, dependencies, CUDA and model status')
     language_collect = sub.add_parser('collect-language', help='Section 5: instruction-labelled two-cup demonstrations')
@@ -72,6 +72,7 @@ def parser():
     demo.add_argument('--seed', type=int, default=0)
     demo.add_argument('--headless', action='store_true')
     demo.add_argument('--fast', action='store_true')
+    demo.add_argument('--output', type=Path, default=None, help='Optional preview directory; keep audit outputs separate')
     replay = sub.add_parser('replay', help='Section 2: replay local action labels in MuJoCo')
     replay.add_argument('--dataset', type=Path, default=None)
     replay.add_argument('--episode', type=int, default=0)
@@ -309,8 +310,8 @@ def scripted_collect(args):
         states.mkdir(exist_ok=True)
         np.savez_compressed(states / 'episode_000000.npz', state=initial_state)
         report['saved_episodes'] = 1
-        output = PROJECT / 'outputs'
-        output.mkdir(exist_ok=True)
+        output = args.output or PROJECT / 'outputs'
+        output.mkdir(parents=True, exist_ok=True)
         agent, wrist = env.images()
         Image.fromarray(agent).save(output / 'scripted_agent.png')
         Image.fromarray(wrist).save(output / 'scripted_wrist.png')

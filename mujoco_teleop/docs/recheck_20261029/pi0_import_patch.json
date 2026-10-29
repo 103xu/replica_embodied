@@ -1,0 +1,7 @@
+{
+  "path": "lerobot/common/policies/pi0/paligemma_with_expert.py",
+  "changed": true,
+  "sha256_before": "2d2a3e0c32037cd73ca833149c48e0223ebe61c20b7fa39e3e658e1520108c0b",
+  "sha256_after": "f04b0959a8174c563596bf9f66f6e27b0408dafa7888412b5debe45612ea5807",
+  "replacement": "pytest.Cache -> transformers.cache_utils.Cache (type annotation only)"
+}

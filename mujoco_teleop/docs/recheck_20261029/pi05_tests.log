@@ -1,0 +1,30 @@
+test_conversion_preserves_values_images_and_boundaries (test_pi05_omy.MigrationTests.test_conversion_preserves_values_images_and_boundaries) ... WARNING:lerobot.utils.import_utils:'torchcodec' is not available in your platform, falling back to 'pyav' as a default decoder
+
+Map:   0%|          | 0/3 [00:00<?, ? examples/s]
+Map: 100%|██████████| 3/3 [00:00<00:00, 527.87 examples/s]
+
+Map:   0%|          | 0/3 [00:00<?, ? examples/s]
+Map: 100%|██████████| 3/3 [00:00<00:00, 428.73 examples/s]
+
+Map:   0%|          | 0/3 [00:00<?, ? examples/s]
+Map: 100%|██████████| 3/3 [00:00<00:00, 500.04 examples/s]
+WARNING:lerobot.utils.import_utils:'torchcodec' is not available in your platform, falling back to 'pyav' as a default decoder
+WARNING:lerobot.utils.import_utils:'torchcodec' is not available in your platform, falling back to 'pyav' as a default decoder
+WARNING:lerobot.utils.import_utils:'torchcodec' is not available in your platform, falling back to 'pyav' as a default decoder
+WARNING:lerobot.utils.import_utils:'torchcodec' is not available in your platform, falling back to 'pyav' as a default decoder
+WARNING:root:No accelerated backend detected. Using default cpu, this will be slow.
+WARNING:lerobot.configs.policies:Device 'cuda' is not available. Switching to 'cpu'.
+ok
+test_no_holdout_for_one_demo (test_pi05_omy.MigrationTests.test_no_holdout_for_one_demo) ... ok
+test_rejects_unverified_labels_wrong_shape_and_timestamps (test_pi05_omy.MigrationTests.test_rejects_unverified_labels_wrong_shape_and_timestamps) ... ok
+test_rollout_uses_eef_state_absolute_commands_and_20hz_physics (test_pi05_omy.MigrationTests.test_rollout_uses_eef_state_absolute_commands_and_20hz_physics) ... ok
+test_complete_load_is_strict_and_installed_once (test_pi05_omy.PretrainedLoaderTests.test_complete_load_is_strict_and_installed_once) ... All keys loaded successfully!
+ok
+test_silent_random_initialization_fallback_is_rejected (test_pi05_omy.PretrainedLoaderTests.test_silent_random_initialization_fallback_is_rejected) ... Returning model without loading pretrained weights
+Warning: Could not load state dict
+ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 6.961s
+
+OK

@@ -501,12 +501,17 @@ Get-Content ".\mujoco_teleop\outputs\learn_blue_$StudyTag\replay_report.json"
 对应 `7.pi0.ipynb`。本机已接入源码和配置，**尚未完成 π0 训练或部署**。
 
 ```powershell
+& $StudyPython .\mujoco_teleop\scripts\repair_pi0_import.py
 & $StudyPython .\mujoco_teleop\scripts\check_vla.py --output ".\mujoco_teleop\outputs\learn_vla_preflight_$StudyTag.json"
 ```
 
-**预期：** π0 和 SmolVLA 配置能够解析，显示上游训练设定与显存容量。加 `--online` 可以检查模型仓库元数据和匿名配置访问，需要联网；这个检查不下载大权重。
+**预期：** π0 和 SmolVLA 配置能够解析，并检查真实模型导入、π0 架构的 meta 内存估算、π0.5 环境是否完整。第一条修正固定 LeRobot 中错误的 `pytest.Cache` 类型导入，只修改项目 `.deps`；重复执行不会重复修改，准备 VLA 环境时也会自动处理。加 `--online` 可以用 π0 源码实际使用的分词器调用检查当前凭据是否能读取 PaliGemma；不会下载大型模型权重。
 
-本机检查发现：PaliGemma 的匿名配置访问返回 401；官方 π0 checkpoint 列出的 safetensors 合计约 14GB。文件大小不等于实际训练显存，但不能据此把完整训练当作已在 8GB 显卡通过。你已说明暂时没有服务器，因此当前先完成检查和准备。
+本机当前分词器访问返回 401，且当前进程没有 Hugging Face 凭据。这需要使用已获 PaliGemma 访问权限的账号与凭据，反复安装 Python 包不能解决授权。
+
+显存也有独立限制：实际 π0 架构的权重约 7.02GiB；按当前参数类型估算，教程默认配置的权重、梯度、Adam 状态约 22.83GiB，只训练动作专家也约 8.80GiB，尚未计入激活与工作区。本机总显存为 7.93GiB。这是 meta 参数估算，不是实际训练峰值或 OOM 测试；也不代表所有量化、LoRA 或卸载方案都不可能。
+
+更完整的依据和 Windows 依赖问题见 [代码复查与 π 模型诊断](RECHECK_REPORT.md)。诊断命令退出成功，只代表检查跑完；不代表 `pi0_ready_under_tutorial_defaults` 已经为真。
 
 **这一步在做什么：** 区分“配置写对了”“模型能访问”“模型能加载”“能训练”“会完成任务”这五件事。不要在 `my_env` 里反复升级包来尝试绕过资源或访问条件。
 
@@ -646,6 +651,8 @@ Get-Content ".\mujoco_teleop\outputs\learn_language_audit_$StudyTag.json"
 ### 10.1 使用独立 Python 3.12
 
 当前机器已经建好 `.venv-pi05`，其中是 Python 3.12.13、LeRobot 0.6.1、CPU 版 PyTorch。它与 `my_env` 分开。
+
+这个环境没有安装完整 `lerobot[pi]` 模型依赖；实际构造模型会提示缺少 `transformers`。这不影响下文的数据与接口测试，但不能拿它直接执行 GPU 微调。上游完整依赖还存在 Windows 冲突：固定 `torchcodec==0.4.0`，而 LeRobot 0.6.1 在 Windows 上要求 `torchcodec>=0.7.0`。完整训练环境需要单独适配，不能直接照抄该文件，也不要升级现有 `my_env` 来混装两个版本。
 
 新克隆需要恢复这个数据测试环境时运行（当前机器不需要反复安装）：
 
