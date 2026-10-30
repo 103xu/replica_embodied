@@ -3,6 +3,8 @@
 
 自学入口：[从机械臂示教到理解 VLA 的个人练习册](mujoco_teleop/docs/LEARNER_GUIDE.md)（按教程顺序，包含可执行命令、预期效果和原理解释）。
 
+面向老师的简要汇报：[具身智能与 VLA 仿真实验阶段汇报](mujoco_teleop/docs/VLA_TEACHER_OVERVIEW.md)（按教程顺序说明实际工作、问题处理和阶段结果，图片、GIF 留有占位符）。
+
 最新检查：[整体复跑结果与 π 模型训练阻塞原因](mujoco_teleop/docs/RECHECK_REPORT.md)（真实导入、授权、显存估算和 Windows 依赖解析）。
 
 ## 现在已有项目

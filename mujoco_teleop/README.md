@@ -1,364 +1,348 @@
-# OMY 示教、ACT 与 VLA 本机复现（Every-Embodied 第 1～10 部分）
+# LeRobot MuJoCo 训练 ACT、SmolVLA、Pi0 本机复现
 
-**第一次动手学习，请从 [个人自学练习册](docs/LEARNER_GUIDE.md) 开始。** 它按参考教程顺序讲解命令、预期现象和每一步的作用，直接调用 my_env 的 Python，适用于 PowerShell 禁止运行 `.ps1` 的情况。本 README 保留参数与工程说明。
+本项目参考 [Every-Embodied 的 MuJoCo 教程](https://github.com/datawhalechina/every-embodied/blob/main/06-%E7%AD%96%E7%95%A5%E6%8A%93%E5%8F%96%E6%88%96%E6%8A%93%E5%8F%96VLA/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%8E%A7%E5%88%B6%E3%80%81VLA%E3%80%81VLM/04mujoco%E5%A4%8D%E7%8E%B0ACT%E3%80%81Pi0%E3%80%81SmolVLA/README.md)，在 Windows 上逐步完成 OMY 机械臂的示教采集、数据回放、模型训练与仿真部署。
 
-在 Windows 上复现 OMY 六轴机械臂的键盘示教采集和动作回放。使用教程原始机械臂、杯子、盘子、场景与逆运动学代码；提供独立 Python/PowerShell 入口，避免 Notebook 的工作目录、Windows 多进程和误删数据问题。
+原始 Notebook 和场景保存在 [vendor/every_embodied](vendor/every_embodied/)，本机运行入口为 [run.py](run.py)。第一次学习可配合 [个人自学练习册](docs/LEARNER_GUIDE.md) 使用。
 
-当前实现：第 1～4 部分的 ACT 采集、回放、训练和部署；第 5～6 部分的双杯语言数据；第 8 部分 SmolVLA 预训练加载、微调与部署；第 9 部分数据/策略诊断；第 10 部分 π0.5 数据转换与接口测试。**π0、π0.5 完整模型训练及 XR 遥操作尚未完成，也不包含真机控制。** ACT 基线不使用语言，SmolVLA 使用图像、关节状态和任务文字。
+## 目录
 
-进度与证据见 [VLA 复现记录](docs/VLA_REPRODUCTION_LOG.md)。训练程序结束、保存权重与实际抓放成功分别记录。
+- [安装](#安装)
+- [更新计划](#更新计划)
+- [1. 采集示教数据](#1-采集示教数据)
+- [2. 回放数据](#2-回放数据)
+- [3. 训练 Action-Chunking-Transformer（ACT）](#3-训练-action-chunking-transformeract)
+- [4. 部署 ACT 策略](#4-部署-act-策略)
+- [5-6. 语言条件环境中的采集与可视化](#5-6-语言条件环境中的采集与可视化)
+- [模型与数据集](#模型与数据集)
+- [7. 训练与部署 pi_0](#7-训练与部署-pi_0)
+- [8. 训练与部署 SmolVLA](#8-训练与部署-smolvla)
+- [9. 策略诊断与物理成功评估](#9-策略诊断与物理成功评估)
+- [10. 用 π0.5 微调 OMY](#10-用-π05-微调-omy)
+- [复现记录](#复现记录)
+- [致谢](#致谢)
 
-最新复查：[代码复查与 π 模型诊断](docs/RECHECK_REPORT.md)。π0 的类型导入问题已修复；PaliGemma 授权、显存，以及 π0.5 的 CPU 环境和 Windows 依赖冲突分别检查，不再只用 YAML 解析通过代表模型可运行。
+## 安装
 
-另提供 `auto-demo`：以确定性 IK 脚本执行一次抓杯、抬升、搬运、放下，再保存实际仿真轨迹，方便无需手工操作就验证第 1、2 部分。它不是训练出来的 VLA 策略，也不是人类键盘示教。
+本机使用 **Windows、Python 3.10、MuJoCo 3.1.6**，显卡为 **RTX 5060 Laptop，约 8GB 显存**。第 1～9 节沿用已有的 `my_env`，保留原有 PyTorch 和 torchvision；第 10 节单独使用 Python 3.12 环境。
 
-## 来源与版本
-
-- [上游教程](https://github.com/datawhalechina/every-embodied/tree/14d7c6c93debf01419b21e50b649a06f15881c38/06-%E7%AD%96%E7%95%A5%E6%8A%93%E5%8F%96%E6%88%96%E6%8A%93%E5%8F%96VLA/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%8E%A7%E5%88%B6%E3%80%81VLA%E3%80%81VLM/04mujoco%E5%A4%8D%E7%8E%B0ACT%E3%80%81Pi0%E3%80%81SmolVLA)
-- Every-Embodied 固定提交：`14d7c6c93debf01419b21e50b649a06f15881c38`。
-- LeRobot 固定提交：`10b7b3532543b4adfb65760f02a49b4c537afde7`，数据格式 v2.1。
-- 来源文件清单、大小与 Git blob SHA-1：[`upstream_manifest.json`](upstream_manifest.json)。
-- 原始 Notebook、环境代码与模型资源保存在 [`vendor/every_embodied/`](vendor/every_embodied/)。上游代码保持原样，本地适配集中在 `src/omy_repro/`。
-- 复现操作记录见 [`docs/REPRODUCTION_LOG.md`](docs/REPRODUCTION_LOG.md)，第三方来源与授权见 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)。
-- 第 3、4 部分独立记录见 [`docs/ACT_REPRODUCTION_LOG.md`](docs/ACT_REPRODUCTION_LOG.md)。
-
-## 当前机器的环境选择
-
-使用已有 `my_env` 的 Python 3.10，不使用 base 的 Python 3.14。检测到 NVIDIA RTX 5060 Laptop GPU（约 8 GB 显存），保留已有 PyTorch `2.14.0+cu130` 与 torchvision `0.29.0+cu130`。第 1、2 部分不需要 GPU 训练；第 3、4 部分默认使用 CUDA。
-
-旧版 LeRobot 需要旧版 `datasets/fsspec`。为保留用户环境，第 1～9 部分新增依赖安装在本项目 `.deps/` 中，由 `run.py` 启动时加载，不安装进 base/my_env 的 site-packages。第 10 部分的数据测试单独使用 `.venv-pi05`，避免升级旧版 LeRobot。普通终端直接 `import mujoco` 不会加载 `.deps`，请使用项目入口。
-
-`environment-before.json` 保存复现前 my_env 的包版本；`.deps` 不进入 Git。克隆项目后需要运行安装脚本，项目内的模型、源码会随 Git 保留。
-
-## 快速运行（Windows PowerShell）
-
-在仓库根目录执行，先设置当前终端的解释器变量。以下直接启动 Python，不受 `.ps1` 执行策略限制，也不依赖 `conda.exe`。`run.ps1` 保留为可选包装入口。
+以下命令均在**仓库根目录**的 PowerShell 中执行：
 
 ```powershell
+Set-Location "C:\Users\32010\GitHub\replica_embodied"
 $PythonExe = "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe"
-
-# 查看解释器、依赖与场景资源
-& $PythonExe .\mujoco_teleop\run.py doctor
-
-# 先回放本机已生成的成功抓放轨迹
-& $PythonExe .\mujoco_teleop\run.py replay --dataset .\mujoco_teleop\data\scripted_demo_004
-
-# 第 1 部分：手动采集一条成功示教；路径相对于当前终端
-& $PythonExe .\mujoco_teleop\run.py collect --dataset .\mujoco_teleop\data\my_first_demo --episodes 1
-
-# 第 2 部分：回放刚才保存的第 0 条示教
-& $PythonExe .\mujoco_teleop\run.py replay --dataset .\mujoco_teleop\data\my_first_demo --episode 0
-```
-
-如果不想设置变量，也可以直接写出解释器路径：
-
-```powershell
-& "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe" .\mujoco_teleop\run.py doctor
-& "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe" .\mujoco_teleop\run.py collect --episodes 1
-& "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe" .\mujoco_teleop\run.py replay --episode 0
-```
-
-省略 `--dataset` 时，正式采集和回放都使用 `mujoco_teleop/data/demo_data`。采集路径已存在会报错退出，**不会删除或覆盖旧示教**；再次采集请换一个新目录。
-
-## 第 1 部分：键盘采集
-
-窗口打开后，先点击 MuJoCo 窗口使其获得焦点。键盘控制沿用教程：
-
-| 按键 | 作用 |
-| --- | --- |
-| W / S、A / D | 在桌面平面移动末端 |
-| R / F | 上升 / 下降 |
-| Q / E、方向键 | 调整末端姿态 |
-| 空格 | 切换夹爪开合 |
-| Z | 放弃当前未保存回合，重置机器人和物体 |
-| Esc / 关闭窗口 | 退出；未成功的回合不作为成功示教保存 |
-
-操作目标：靠近杯子 → 调整高度和夹爪方向 → 抓起杯子 → 移到盘子上 → 松开夹爪 → 抬高末端。按教程的 `check_success()` 判定成功后自动保存。只打开窗口或移动机械臂，并不表示抓放成功。
-
-采集频率为 **20 Hz**；每条记录的观测在下发本帧动作前取得，随后推进 0.05 秒仿真：
-
-| 字段 | 形状 / 含义 |
-| --- | --- |
-| `observation.image` | `256×256×3`，场景相机 RGB |
-| `observation.wrist_image` | `256×256×3`，腕部相机 RGB |
-| `observation.state` | `float32[6]`，末端位置和欧拉角 |
-| `action` | `float32[7]`，6 个绝对目标关节角 + 夹爪命令，0 开 / 1 闭 |
-| `obj_init` | `float32[6]`，杯子和盘子的初始位置 |
-| `task` | `Put mug cup on the plate`，通过任务索引关联 |
-
-动作来自 `get_commanded_joint_action()`，不是 `step()` 返回的观测。执行控制前将关节目标统一为数据实际保存的 float32，IK 求解后恢复完整积分状态（含求解器热启动状态），避免未保存的浮点精度或 IK 副作用影响回放。保留图像到 Parquet，避免依赖外部 FFmpeg；原始 PNG 也保留，便于检查，不做自动清理。
-
-## 第 2 部分：数据回放
-
-回放读取本地 LeRobot v2.1 数据，恢复初始物理状态后，按 20 Hz 将动作下发到同一 OMY 场景。窗口的图像叠层显示**采集时保存的相机图像**，机器人主体显示当前回放仿真。结束后输出 JSON 报告和回放末帧的双相机图片。
-
-```powershell
-# 无主窗口地验证回放；仍需要可工作的 OpenGL/桌面驱动
-& $PythonExe .\mujoco_teleop\run.py replay --dataset .\mujoco_teleop\data\my_first_demo --headless --fast
-```
-
-`complete=true` 表示动作序列完整回放；`final_task_success` 表示末帧是否满足上游任务判定。这两个指标含义不同。`max_next_observation_position_error_m` 比较回放动作后的末端位置与下一条原始观测。
-
-额外的 `initial_states/*.npz` 保存 MuJoCo 积分状态，便于从相同状态开始回放；这是本地扩展，不改变 LeRobot 的标准字段。不带该文件的上游数据仍可按 `obj_init` 回放，物理轨迹可能存在差异。
-
-## 自动抓放并采集实际轨迹
-
-```powershell
-# 打开窗口，观看抓放并保存数据（新目录）
-& $PythonExe .\mujoco_teleop\run.py auto-demo --dataset .\mujoco_teleop\data\my_auto_demo
-& $PythonExe .\mujoco_teleop\run.py replay --dataset .\mujoco_teleop\data\my_auto_demo
-
-# 无主窗口、加速执行同一控制流程
-& $PythonExe .\mujoco_teleop\run.py auto-demo --dataset .\mujoco_teleop\data\another_auto_demo --headless --fast
-```
-
-默认 `seed=0` 是本机验证配置。脚本只通过机械臂关节和夹爪控制物体，不在运行过程中修改杯子位置或附加吸附约束。结束时同时检查杯子实际抬升超过 10 厘米、上游成功判定成立，才保存成功回合；失败不会伪装成成功示教。20 Hz、602 帧约对应 30.1 秒仿真。
-
-上游成功判定检查杯盘位置距离、夹爪松开和末端抬高，不要求杯子保持竖直。当前样例仅用于单场景流程验证，不能作为模型泛化或严格放置质量的指标。
-
-运行后可在 `outputs/scripted_preview.gif` 观看采集动画。采集结果与回放结果的截图、详细指标见本项目 `docs/`。
-
-本机最终验证：`data/scripted_demo_004`，602 帧（30.1 秒），杯子实际抬升约 **20.69 厘米**；采集与回放的任务判定均成功；本次回放的末端位置对齐误差为 **0.0 米**。这是同一机器、版本和种子下的记录，不承诺跨机器逐位一致。
-
-| 采集末帧 | 回放末帧 |
-| --- | --- |
-| ![采集结果](docs/media/scripted_collection.png) | ![回放结果](docs/media/scripted_replay.png) |
-
-这条数据和所有调试数据保存在当前本机的 `data/`，不会随 Git 上传。在其他机器克隆后，运行 `auto-demo` 可重新生成。
-
-## 自动检查采集—保存—回放链路
-
-不需要手工操作的 `smoke` 模式只让机械臂小幅上下运动，生成**明确标记为 smoke 的接口测试数据**，不能用于声称完成抓杯实验或训练成功。再次运行时更换目录。
-
-```powershell
-& $PythonExe .\mujoco_teleop\run.py smoke --dataset .\mujoco_teleop\data\smoke_check --headless --fast --frames 40
-& $PythonExe .\mujoco_teleop\run.py replay --dataset .\mujoco_teleop\data\smoke_check --headless --fast
-```
-
-`--headless` 指不打开主窗口，仍会渲染相机图像；当前适配依赖上游的 GLFW/显示器检测，不保证可在完全没有显示服务的 Linux 服务器运行。
-
-## 第 3 部分：训练 ACT
-
-在已有第 1、2 部分环境上，先补齐 ACT 附加依赖并缓存官方 ResNet18 初始化权重：
-
-```powershell
-& "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe" .\mujoco_teleop\scripts\prepare_act.py
-```
-
-首次运行需要网络下载 torchvision 官方骨干网络权重，后续训练和部署读取本地缓存。没有替换已有 PyTorch，也不需要在 base 里安装包。
-
-```powershell
-# 新克隆或本机没有数据时，先执行此命令生成训练示教；已有同名目录则跳过
-& $PythonExe .\mujoco_teleop\run.py auto-demo --dataset .\mujoco_teleop\data\scripted_demo_004 --headless --fast
-
-# 完整训练；再次训练时使用一个新的 --output 目录
-& $PythonExe .\mujoco_teleop\run.py train-act --dataset .\mujoco_teleop\data\scripted_demo_004 --output .\mujoco_teleop\checkpoints\act_omy_5000 --steps 5000 --batch-size 64
-```
-
-沿用教程的 ACT 架构、10 步动作块、Adam 1e-4、图像噪声 0.02。输入为单路场景相机与 6 维末端位姿；不使用腕部相机。输出为 10×7 的关节目标和夹爪命令。使用 BF16 混合精度；显存不足时可以减小 `--batch-size`，`--no-amp` 可关闭混合精度。
-
-输出目录保留：
-
-- `training_run.json`：数据哈希、实际配置、步数、显存峰值、耗时和离线指标。
-- `metrics.jsonl`、`training_loss.png`：每步 loss 和训练曲线。
-- `offline_actions.npz/png`：离线动作预测与示教标签的对比。
-- `best/config.json`、`best/model.safetensors`：按离线 MAE 选择的 checkpoint。
-- `final/`：第 5000 步的最终 checkpoint。
-
-**只有一个训练回合，当前任务属于单场景拟合。** 离线评估只传入当前观测，明确排除真值未来动作；MAE 降低不能代替真实闭环抓放成功。7 维总体 MAE 混合关节弧度与夹爪单位，判断精度时应查看报告中的分维度指标。
-
-## 第 4 部分：部署训练好的 ACT
-
-```powershell
-# 当前机器：直接观看已验证成功的 ACT 部署
-& $PythonExe .\mujoco_teleop\run.py deploy-act
-
-# 原教程 10 步配置的时间集成对照（本机没有完成抓放）
-& $PythonExe .\mujoco_teleop\run.py deploy-act --checkpoint .\mujoco_teleop\checkpoints\act_omy_5000\final --output .\mujoco_teleop\outputs\act_my_rollout --mode ensemble --ensemble 0.9
-
-# 每次执行模型预测的 10 步动作块
-& $PythonExe .\mujoco_teleop\run.py deploy-act --checkpoint .\mujoco_teleop\checkpoints\act_omy_5000\best --output .\mujoco_teleop\outputs\act_my_chunk_rollout --mode chunk --action-steps 10 --headless --fast
-```
-
-部署只读取实时图像和末端位姿，动作完全来自加载的 ACT 权重，不回放示教、不使用 IK 控制脚本接管。程序严格加载完整 checkpoint，缺权重即停止，不允许随机初始化伪装为部署成功。
-
-输出目录已有时拒绝覆盖。部署最多执行 `--max-steps` 帧（默认 1200）；`--trials N` 依次使用 `seed` 到 `seed+N-1`。每个 trial 会清空策略动作队列/时间集成状态。
-
-`deployment_report.json` 分别记录上游任务判定与更严格的抓放确认：实际抬升超过 10 厘米、夹爪命令不超过 0.1、末端高度至少 0.95 m，并在盘上连续保持 20 帧。逐帧动作、状态和图片保存在相同目录。默认 seed=0 与训练示教相同；不同种子不保证成功，不能把同种子结果当作泛化评测。
-
-### 本机结果与成功配置
-
-原教程的 10 步模型完成了 5000 步训练，但 best/final 在时间集成和动作块模式都停在杯子上方，未完成抓放。完整负结果保存在 [`docs/act_baseline/`](docs/act_baseline/)。
-
-在不改变示教数据、输入和 ACT 主体结构的情况下，扩大预测窗口到 100 步，并继承训练权重继续训练 2000 步：
-
-```powershell
-& $PythonExe .\mujoco_teleop\run.py train-act --dataset .\mujoco_teleop\data\scripted_demo_004 --output .\mujoco_teleop\checkpoints\act_omy_chunk100 --steps 2000 --batch-size 32 --chunk-size 100 --learning-rate 0.00005 --init-checkpoint .\mujoco_teleop\checkpoints\act_omy_5000\best
-
-& $PythonExe .\mujoco_teleop\run.py deploy-act --checkpoint .\mujoco_teleop\checkpoints\act_omy_chunk100\final --output .\mujoco_teleop\outputs\act_my_success --mode chunk --action-steps 100
-```
-
-共享网络权重严格加载；动作 query 位置嵌入按新长度插值，固定 VAE 位置编码相应扩展。这个工程适配同时增加了训练步数，不是只比较窗口长度的严格消融实验。
-
-当前 `deploy-act` 默认加载 **`act_omy_chunk100/final`**，按 checkpoint 中的动作步数执行。100 步动作块意味着每 5 秒仿真重新查询一次模型，中间以 20 Hz 执行模型已预测的动作。`select_action` 的耗时统计包含缓存动作和首次 CUDA 初始化，不能当作纯模型单次推理延迟。
-
-本机 seed=0 的验证结果：
-
-| 验证 | 完成帧数 | 杯子最大抬升 | 松爪后连续保持 | 严格抓放确认 |
-| --- | --- | --- | --- | --- |
-| 无主窗口 | 586 | 21.03 cm | 20 帧 | 通过 |
-| 有窗口 | 572 | 21.23 cm | 20 帧 | 通过 |
-
-两次均使用 ACT 神经网络控制，没有示教回放或 IK 接管。长窗口的 `best` 虽然离线误差更低，却没有通过抓放，因此默认使用实际验证通过的 `final`。这些是同一训练场景的两次运行，不能解释为跨场景成功率。
-
-![ACT 独立控制的最终抓放结果](docs/act_horizon100/act_confirmed_gui_fixed_trial_000_agent.png)
-
-详细训练、失败对照、OpenGL 上下文修正和验证过程见 [`ACT_REPRODUCTION_LOG.md`](docs/ACT_REPRODUCTION_LOG.md)。
-
-训练权重约 206 MB，留在本机 `checkpoints/`，不直接提交到 GitHub；新机器需要先训练或复制完整 checkpoint 目录再部署。
-
-## 第 5～10 部分：语言数据、SmolVLA、诊断与 π0.5 数据准备
-
-以下在仓库根目录的 PowerShell 执行，直接调用 Python，适用于系统禁止 `.ps1` 的情况。初学者请优先跟随 [个人练习册](docs/LEARNER_GUIDE.md)；本节是命令索引。
-
-```powershell
-$PythonExe = "C:\Users\32010\Apps\Anaconda\envs\my_env\python.exe"
 $RunTag = Get-Date -Format "yyyyMMdd_HHmmss"
-$LanguageData = ".\mujoco_teleop\data\language_demo_020"
+$SingleData = ".\mujoco_teleop\data\single_$RunTag"
+$LanguageData = ".\mujoco_teleop\data\language_$RunTag"
+$ActRun = ".\mujoco_teleop\checkpoints\act_$RunTag"
+$ActLongRun = ".\mujoco_teleop\checkpoints\act_chunk100_$RunTag"
 $SmolRun = ".\mujoco_teleop\checkpoints\smol_$RunTag"
+
+# 新克隆项目时安装；当前机器已有 .deps，可跳过
+& $PythonExe .\mujoco_teleop\scripts\install_dependencies.py
+
+# 检查解释器、依赖、GPU 和场景资源
+& $PythonExe .\mujoco_teleop\run.py doctor
 ```
 
-### 5、6：双杯语言数据
+新增依赖放在项目的 `.deps/`，由启动入口自动加载，不向 base 或 my_env 混装旧版 LeRobot。已有 `.deps` 时安装脚本会拒绝覆盖；不建议另外直接执行 `pip install lerobot`。
 
-本机已有 `language_demo_020`（20 条、12,782 帧），可以直接回放。新克隆缺少数据时，先在新目录采集：
+上述方式直接调用 Python，可用于 PowerShell 提示“禁止运行脚本”的情况。重新打开终端时，需要重新设置解释器和路径变量；再次采集或训练请使用新的目录。
+
+盘子模型保留上游 ZIP，首次运行会离线解压。需要补齐或校验原始资源时执行：
 
 ```powershell
-# 只在 $LanguageData 不存在时运行；已有数据时更换 --dataset，避免覆盖。
+& $PythonExe .\mujoco_teleop\scripts\fetch_upstream.py
+```
+
+## 更新计划
+
+- [x] OMY 场景与 Windows 独立运行入口
+- [x] 单杯示教采集、数据保存与回放
+- [x] ACT 训练与单杯抓放部署
+- [x] 红杯、蓝杯语言条件数据采集与回放
+- [x] SmolVLA 微调、部署与失败结果记录
+- [x] 教程公开 SmolVLA 权重的红、蓝杯抓放验证
+- [x] 数据质量审计、物理成功评估与整体复查
+- [x] π0 运行条件检查、π0.5 数据转换与接口测试
+- [ ] 自训 SmolVLA 完成稳定抓放
+- [ ] π0、π0.5 完整模型训练与部署
+- [ ] XR 设备验证
+
+## 1. 采集示教数据
+
+对应原教程 [1.collect_data.ipynb](vendor/every_embodied/1.collect_data.ipynb)。
+
+使用 **ROBOTIS OMY 六轴机械臂及夹爪的 MuJoCo 仿真模型**，无需实体机械臂。任务是抓起杯子、移动到盘子上、松开夹爪并抬高末端。
+
+键盘采集：
+
+```powershell
+& $PythonExe .\mujoco_teleop\run.py collect --dataset $SingleData --episodes 1
+```
+
+让 MuJoCo 窗口获得键盘焦点后操作：
+
+- `W / A / S / D`：平面移动。
+- `R / F`：上升、下降。
+- `Q / E`、方向键：调整姿态。
+- 空格：切换夹爪开合。
+- `Z`：重置环境，丢弃当前未保存回合。
+- `Esc`：退出。
+
+环境判定成功后自动保存一条示教。数据目录已存在时会停止，不会删除旧数据；未成功的键盘回合不保存为成功示教。
+
+> 【GIF 占位：键盘控制 OMY 完成抓杯、搬运和放置。】
+
+也可以先用脚本生成一条示教，验证整个流程。**下面与键盘采集二选一**，不能向同一个已有目录重复采集：
+
+```powershell
+& $PythonExe .\mujoco_teleop\run.py auto-demo --dataset $SingleData
+```
+
+这一步由 IK 控制脚本执行真实仿真动作，不使用训练模型。本机成功样例为 **602 帧、20Hz、约 30.1 秒**。
+
+数据按 LeRobot v2.1 格式保存，主要字段如下：
+
+| 字段 | 内容 |
+| --- | --- |
+| `observation.image` | 场景相机图像，256×256×3 |
+| `observation.wrist_image` | 腕部相机图像，256×256×3 |
+| `observation.state` | 六维末端位姿：位置与欧拉角 |
+| `action` | 六个绝对目标关节角 + 夹爪命令，0 开、1 闭 |
+| `obj_init` | 杯子和盘子的初始位置 |
+| `task` | 抓杯放盘的任务文字 |
+
+保存的动作是实际下发的目标命令，观测在本帧命令下发前取得。另存初始物理状态，便于后续按相同条件回放。
+
+## 2. 回放数据
+
+对应原教程 [2.visualize_data-omy.ipynb](vendor/every_embodied/2.visualize_data-omy.ipynb)。
+
+```powershell
+& $PythonExe .\mujoco_teleop\run.py replay --dataset $SingleData --episode 0 --output ".\mujoco_teleop\outputs\replay_$RunTag"
+```
+
+回放会恢复场景初始状态，按保存的动作重新驱动机械臂。主窗口显示当前仿真，叠加图像来自采集时保存的相机画面。
+
+> 【GIF 占位：单杯示教采集与动作回放的对比。】
+
+本机 602 帧样例完整回放，任务判定成功，末端位置对齐误差为 **0**。这是相同机器、版本和初始状态下的结果。
+
+输出目录保留 JSON 报告与双相机图片。报告中的 `complete` 表示是否完整回放，`final_task_success` 表示最终是否完成任务。
+
+## 3. 训练 Action-Chunking-Transformer（ACT）
+
+对应原教程 [3.train.ipynb](vendor/every_embodied/3.train.ipynb)。
+
+先准备附加依赖和官方 ResNet18 初始化权重，再使用第 1 节的数据训练：
+
+```powershell
+& $PythonExe .\mujoco_teleop\scripts\prepare_act.py
+& $PythonExe .\mujoco_teleop\run.py train-act --dataset $SingleData --output $ActRun --steps 5000 --batch-size 64 --chunk-size 10
+```
+
+模型读取当前场景图像和末端位姿，预测接下来的关节与夹爪动作。上面的配置训练 **5,000 步**，本机记录约 **17 分钟**，实际耗时随机器和配置变化。
+
+训练目录保存 `best/`、`final/` 权重，以及损失曲线、预测动作对比和配置记录。
+
+> 【图片占位：ACT 训练损失曲线，以及预测动作与示教动作对比。】
+
+当前只有一条单杯示教，主要用于验证训练流程。离线动作误差下降后，还需要到下一节检查实际抓放。
+
+<details>
+<summary>Windows 训练注意事项</summary>
+
+本地入口使用主进程读取数据，避免 Notebook 多进程的 PicklingError。显存不足时可减小 `--batch-size`；完整操作说明见 [个人自学练习册](docs/LEARNER_GUIDE.md)。
+
+</details>
+
+## 4. 部署 ACT 策略
+
+对应原教程 [4.deploy.ipynb](vendor/every_embodied/4.deploy.ipynb)。
+
+加载上一步权重，让模型根据实时观测控制机械臂：
+
+```powershell
+& $PythonExe .\mujoco_teleop\run.py deploy-act --checkpoint "$ActRun\final" --output ".\mujoco_teleop\outputs\act_baseline_$RunTag" --mode chunk --action-steps 10
+```
+
+本机 10 步动作窗口的模型停在杯子上方，没有完成抓放。在保留失败结果后，改用 100 步预测窗口，从原训练的 best 权重继续训练 2,000 步：
+
+```powershell
+& $PythonExe .\mujoco_teleop\run.py train-act --dataset $SingleData --output $ActLongRun --steps 2000 --batch-size 32 --chunk-size 100 --learning-rate 0.00005 --init-checkpoint "$ActRun\best"
+& $PythonExe .\mujoco_teleop\run.py deploy-act --checkpoint "$ActLongRun\final" --output ".\mujoco_teleop\outputs\act_success_$RunTag" --mode chunk --action-steps 100
+```
+
+本机续训后的 final 权重在有窗口和无窗口模式下均完成抓放，杯子抬升约 **21cm**。部署动作来自模型预测，不回放示教，也不由脚本接管。
+
+> 【GIF 占位：自训 ACT 模型完成单杯抓取与放置；可并列展示 10 步窗口失败对照。】
+
+当前机器可直接运行 `& $PythonExe .mujoco_teleopun.py deploy-act`，加载已有成功权重。该权重位于本机 `checkpoints/act_omy_chunk100/final`，不会随 Git 克隆下载。
+
+ACT 的确认规则包含抬升超过 10cm、松爪、末端抬高和盘上连续保持 20 帧，未额外要求杯子竖直。成功验证使用与示教相同的 seed=0，尚不能说明泛化能力。
+
+## 5-6. 语言条件环境中的采集与可视化
+
+对应原教程：
+
+- [5.language_env.ipynb](vendor/every_embodied/5.language_env.ipynb)：红、蓝双杯任务的数据采集。
+- [6.visualize_data.ipynb](vendor/every_embodied/6.visualize_data.ipynb)：已采集数据的回放。
+
+从单杯扩展到红杯、蓝杯两个任务，同时保存相机图像、关节状态、目标动作与任务文字。先生成 20 条脚本示教，再分别回放两种任务：
+
+```powershell
 & $PythonExe .\mujoco_teleop\run.py collect-language --dataset $LanguageData --episodes 20 --scripted --headless --fast
 & $PythonExe .\mujoco_teleop\run.py replay-language --dataset $LanguageData --episode 0 --output ".\mujoco_teleop\outputs\red_$RunTag"
 & $PythonExe .\mujoco_teleop\run.py replay-language --dataset $LanguageData --episode 1 --output ".\mujoco_teleop\outputs\blue_$RunTag"
 ```
 
-去掉采集命令的 `--scripted` 可做键盘示教；键盘模式不能使用 `--headless`。双杯状态是关节角，不能与旧 ACT 末端位姿数据混用。20 条均能按标签重放，但竖直放置的物理审计只有 12/20，通过采集判定不等于示教质量合格。
+手动采集时去掉 `--scripted --headless --fast`，键位与第 1 节一致。
 
-### 7：π0 预检查
+**数据示例**
+
+> 【GIF 占位：红杯、蓝杯指令对应的抓放数据与回放画面。】
+
+本机保存 **20 条、12,782 帧**，红杯与蓝杯各 10 条；全部轨迹回放的关节状态对齐误差为 0。进一步检查发现部分示教放置后杯子倾倒，第 9 节会单独审计。
+
+**这里的六维状态是关节角，第 1 节则是末端位姿。** 两种数据不能只因维数相同就混用。
+
+## 模型与数据集
+
+### 获取语言条件数据集
+
+第 7、8 节使用语言条件数据。本项目优先使用第 5～6 节自行采集并回放的数据；当前机器已有 `data/language_demo_020`，使用已有数据时设置：
 
 ```powershell
-& $PythonExe .\mujoco_teleop\scripts\check_vla.py --online --output ".\mujoco_teleop\outputs\vla_check_$RunTag.json"
+$LanguageData = ".\mujoco_teleop\data\language_demo_020"
 ```
 
-只做配置、资源与公开访问检查，不下载大模型或训练。π0 完整训练未在本机通过，PaliGemma 匿名配置请求返回 401；当前不提供声称可直接成功的本机训练命令。
+新克隆项目没有这些本机数据，应先执行第 5～6 节。`data/`、`checkpoints/`、下载缓存和依赖目录均不随 Git 上传。
 
-新检查还会真正导入 π0 模型并在 meta 设备统计参数。固定版错误的 `pytest.Cache` 导入由 `scripts/repair_pi0_import.py` 修正，`prepare_vla.py` 会自动应用。当前 π0 默认训练的权重/梯度/Adam 估算约 22.83GiB，动作专家配置约 8.80GiB，不含激活；本机 7.93GiB。π0.5 独立环境为 CPU 数据环境，缺少模型 extras；原上游 `torchcodec==0.4.0` 与 Windows 的 `>=0.7.0` 要求也冲突。具体证据见复查报告。
+### 模型参考
 
-### 8：SmolVLA
+| 模型 | 用途 | 本机结果 |
+| --- | --- | --- |
+| 本机 ACT 权重 | 单杯示教训练 | 100 步窗口续训后完成抓放 |
+| [SmolVLA base](https://huggingface.co/lerobot/smolvla_base) | 自行微调的初始化权重 | 已完成微调，自训模型尚未完成抓放 |
+| [OMY SmolVLA 微调权重](https://huggingface.co/Jeongeun/omy_pnp_smolvla) | 教程公开的任务模型 | 对齐接口后红、蓝杯物理成功 2/2 |
+| [OMY pi_0 微调权重](https://huggingface.co/Jeongeun/omy_pnp_pi0) | 原教程模型参考 | 本机未部署 |
+| [π0.5 base](https://huggingface.co/lerobot/pi05_base) | 第 10 节微调的初始化模型 | 本机仅完成数据准备 |
+
+## 7. 训练与部署 pi_0
+
+对应原教程 [训练配置](vendor/every_embodied/pi0_datawhale_eai.yaml) 与 [7.pi0.ipynb](vendor/every_embodied/7.pi0.ipynb)。
+
+本机先执行模型导入、配置、访问权限和显存条件检查：
+
+```powershell
+& $PythonExe .\mujoco_teleop\scripts\check_vla.py --online --output ".\mujoco_teleop\outputs\pi_check_$RunTag.json"
+```
+
+固定版代码中的错误类型导入已修复，但**尚未进行完整训练或部署**：
+
+- π0 实际使用的 PaliGemma 分词器访问返回 401，当前缺少可用授权凭据。
+- 按真实模型参数估算，教程默认训练的权重、梯度及 Adam 状态约需 22.83GiB；仅训练动作专家的配置约需 8.80GiB，均未包含激活等开销。
+- 本机 GPU 总容量约 7.93GiB，当前教程标准配置不满足条件；换 Ubuntu 或另开虚拟机不会增加物理显存。
+
+估算来自 meta 设备参数统计，不是本机实际训练峰值。详细检查见 [π 模型诊断](docs/RECHECK_REPORT.md)。
+
+> 【图片占位：π0 运行条件检查结果，展示授权与显存问题；当前没有本机训练曲线或部署 GIF。】
+
+## 8. 训练与部署 SmolVLA
+
+对应原教程 [8.smolvla.ipynb](vendor/every_embodied/8.smolvla.ipynb)。
+
+先下载固定版本预训练权重，再使用语言条件数据微调：
 
 ```powershell
 & $PythonExe .\mujoco_teleop\scripts\prepare_vla.py
-& $PythonExe .\mujoco_teleop\run.py train-smolvla --dataset $LanguageData --output $SmolRun --steps 2000 --batch-size 1 --holdout-episodes 2 --log-every 100
-& $PythonExe .\mujoco_teleop\run.py deploy-smolvla --checkpoint "$SmolRun\final" --output ".\mujoco_teleop\outputs\smol_$RunTag" --max-steps 1000
+& $PythonExe .\mujoco_teleop\run.py train-smolvla --dataset $LanguageData --output $SmolRun --steps 2000 --batch-size 1 --chunk-size 5 --holdout-episodes 2 --log-every 100
+& $PythonExe .\mujoco_teleop\run.py deploy-smolvla --checkpoint "$SmolRun\final" --output ".\mujoco_teleop\outputs\smol_self_$RunTag" --max-steps 1000
 ```
 
-首次联网下载固定版本 SmolVLA 权重及骨干配置/分词器，附加依赖仍放 `.deps`。训练严格匹配全部核心预训练参数，按训练回合重新计算归一化。`--steps 5 --log-every 1` 可先做短检查；上游原配置为 20,000 步、batch=16，本机例子是较短练习配置。
+训练程序严格加载预训练参数，保留最后两个完整回合作为留出数据。模型读取两路图像、关节状态和任务文字，输出机械臂与夹爪动作。
 
-部署依次测试红/蓝指令，输出 JSON、逐帧日志、相机图和 GIF。2,000 步短窗口和续训 3,000 步长窗口模型均没有完成抓放，完整记录保留。权重、数据和 `.deps` 不随 Git 上传。
+本机完成了 **2,000 步短窗口微调**，以及在其基础上的 **3,000 步长窗口续训**。两组模型均可保存、加载和运行，但都未完成抓放；这些是本机练习配置，未执行上游 20,000 步、batch=16 的完整配置。
 
-要先体验已验证能完成任务的 VLA，可运行教程公开 OMY 微调权重：
+**训练日志**
+
+> 【图片占位：SmolVLA 自训损失曲线与动作误差对比。】
+
+**部署教程公开权重**
+
+也可先体验教程已经微调好的 OMY 模型：
 
 ```powershell
 & $PythonExe .\mujoco_teleop\scripts\prepare_vla.py --tutorial-checkpoint
 & $PythonExe .\mujoco_teleop\run.py deploy-smolvla --checkpoint .\mujoco_teleop\.downloads\models\omy_pnp_smolvla --output ".\mujoco_teleop\outputs\smol_public_$RunTag" --upstream-interface --max-steps 1000
 ```
 
-`--upstream-interface` 同时对齐原夹爪映射、积分器和 800×600→256×256 相机流程。本机有窗口、无窗口运行均为红/蓝 **物理成功 2/2**。主要看 `physical_successes`：按第 9 节的 3cm 抬升持续、竖直与任务条件，再稳定 20 帧。`successes` 保留原 ACT 的额外 10cm/0.95m 条件，本次为 0，口径不同。默认按物理规则停止；`--success-rule strict` 可重跑旧规则。
+`--upstream-interface` 对齐原教程的夹爪映射、积分器，以及 800×600 渲染后缩放到 256×256 的相机流程。本机有窗口、无窗口验证均为红杯和蓝杯 **物理成功 2/2**，杯子保持竖直。
 
-发布模型成功与自己训练成功分别记录，也不能把两个 seed=0 任务当作泛化评估。视频和元数据见 [VLA 记录](docs/VLA_REPRODUCTION_LOG.md)。
+> 【GIF 占位：教程公开 SmolVLA 权重分别执行红杯、蓝杯指令。】
 
-### 9：数据与策略诊断
+这项成功来自公开微调权重，与自训结果分别记录。两项 seed=0 任务用于当前场景验证，不作为泛化成功率。
+
+## 9. 策略诊断与物理成功评估
+
+对应原教程 [09策略诊断与物理成功评估.md](vendor/every_embodied/09策略诊断与物理成功评估.md)。
+
+回放全部示教检查物理质量，并检查自训模型的动作误差与指令响应：
 
 ```powershell
 & $PythonExe .\mujoco_teleop\run.py audit-language --dataset $LanguageData --output ".\mujoco_teleop\outputs\audit_$RunTag.json"
 & $PythonExe .\mujoco_teleop\run.py diagnose-smolvla --dataset $LanguageData --checkpoint "$SmolRun\final" --output ".\mujoco_teleop\outputs\diagnose_$RunTag.json" --samples 20
 ```
 
-前者用物理仿真重放所有标签并检查倒杯；后者检查离线动作误差和固定图像/噪声下的指令对照。文字改变能使动作改变，不等于模型选对杯子。XR Notebook 另有设备与 TeleopXR 依赖，当前只保存原文件，未执行。
+物理检查要求目标杯实际抬升至少 3cm 并持续至少 3 帧、满足任务条件且保持竖直；部署还要求连续稳定 20 帧。本机 20 条示教均能通过原抓放检查，满足额外竖直放置要求的为 **12/20**。
 
-### 10：π0.5 数据接口（独立 CPU 环境）
+SmolVLA 部署以 `physical_successes` 为主要结果。`successes` 保留旧 ACT 的额外高度条件，公开模型本次该值为 0，与物理成功 2/2 的评价口径不同。
+
+> 【图片占位：杯子竖直与倾倒的对照，以及逐回合物理审计结果。】
+
+需要重新检查主要链路时执行：
 
 ```powershell
-# 当前机器已准备好；新机器恢复时执行。使用已有 uv，环境单独放项目内。
+& $PythonExe .\mujoco_teleop\scripts\recheck.py
+```
+
+最近复查完成 18 个阶段，20 项本地测试和 6 项 π0.5 数据接口测试通过，已有 ACT 与公开 SmolVLA 权重的抓放结果也再次通过验证。短步反向更新只用于检查程序链路；XR 相关 Notebook 已保留，尚未执行设备实验。
+
+## 10. 用 π0.5 微调 OMY
+
+对应原教程 [10.pi05_omy.ipynb](vendor/every_embodied/10.pi05_omy.ipynb)。
+
+本机已完成这一节的**数据准备与接口测试**。使用独立的 **Python 3.12 / LeRobot 0.6.1** 环境，不升级第 1～9 节的旧环境：
+
+```powershell
 & $PythonExe .\mujoco_teleop\scripts\prepare_pi05.py
 & .\mujoco_teleop\.venv-pi05\Scripts\python.exe .\mujoco_teleop\scripts\pi05_data.py test
 
-# --source 必须是已回放的单杯末端位姿数据；本机已有 pi05_single_001。
-& .\mujoco_teleop\.venv-pi05\Scripts\python.exe .\mujoco_teleop\scripts\pi05_data.py prepare --source .\mujoco_teleop\data\pi05_single_001 --destination ".\mujoco_teleop\data\pi05_v3_$RunTag" --labels-verified
+# 源数据须先通过第 2 节回放，并核实目标动作标签
+& .\mujoco_teleop\.venv-pi05\Scripts\python.exe .\mujoco_teleop\scripts\pi05_data.py prepare --source $SingleData --destination ".\mujoco_teleop\data\pi05_v3_$RunTag" --labels-verified
 ```
 
-实际 6 项上游测试和 602 帧数据转换/50 步窗口对齐通过。该 CPU 环境仅验证数据与接口；没有 π0.5 GPU 微调。上游五步训练曾使用 12.85GiB 分配显存，超过本机约 8GB，用户暂时没有服务器。
+转换保留原数据，输出独立的 LeRobot v3 数据，并检查动作窗口与回合边界。本机已完成 **602 帧转换和 50 步动作窗口对齐**，6 项接口测试通过；输入仍为第 1 节的末端位姿数据，不能直接换成双杯关节状态数据。
 
-## 新机器安装 / 恢复依赖
+> 【图片占位：LeRobot v3 数据目录、转换结果和动作窗口对齐报告。】
 
-需要 Python 3.10 和可用的 PyTorch / torchvision。现有机器的 GPU 版 PyTorch 沿用用户环境，不在本章安装脚本中替换。安装脚本优先读取实际安装后生成的 `requirements-lock.txt`；`requirements.txt` 说明直接依赖，LeRobot 另外按固定提交安装。
+**尚未进行 π0.5 完整模型微调。** 当前独立环境是 CPU 数据测试环境，缺少完整模型依赖；上游训练依赖在 Windows 下还有 TorchCodec 版本冲突。上游另一次五步微调记录的峰值分配显存为 12.85GiB，超过本机容量，该数值不是本机实测或通用最低要求。
 
-```powershell
-& "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe" .\mujoco_teleop\scripts\install_dependencies.py
-```
+## 复现记录
 
-安装脚本只在 `.deps` 不存在时执行，避免覆盖正在使用的依赖。下载失败后可保留 `.downloads` 缓存，再按照日志检查实际安装状态。不同平台需要重新安装依赖，不能把 Windows `.deps` 直接复制到 Ubuntu。
+- [个人自学练习册](docs/LEARNER_GUIDE.md)：逐步操作、预期效果与每一步的作用。
+- [采集与回放记录](docs/REPRODUCTION_LOG.md)：第 1～2 节的环境配置和问题处理。
+- [ACT 复现记录](docs/ACT_REPRODUCTION_LOG.md)：第 3～4 节的训练、失败对照与成功配置。
+- [VLA 复现记录](docs/VLA_REPRODUCTION_LOG.md)：语言数据、SmolVLA 与 π0.5 数据验证。
+- [整体复查与 π 模型诊断](docs/RECHECK_REPORT.md)：复跑结果及当前无法按教程训练 π 模型的具体原因。
 
-若要校验上游原始资源，或资源被遗漏：
+原始教程固定提交为 `14d7c6c93debf01419b21e50b649a06f15881c38`，第 1～9 节 LeRobot 固定提交为 `10b7b3532543b4adfb65760f02a49b4c537afde7`。原始文件保存在 `vendor/`，本地适配在 `src/omy_repro/`；来源校验见 [upstream_manifest.json](upstream_manifest.json)，依赖、数据、大权重与运行输出由 Git 忽略，源码和小型验证记录随仓库保存。
 
-```powershell
-& "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe" .\mujoco_teleop\scripts\fetch_upstream.py
-```
+## 致谢
 
-该脚本校验 Git blob 哈希，遇到现存文件被改动会报错，不会覆盖。盘子资源由上游 ZIP 解压，解压时检查路径，已有文件不覆盖。
-
-运行回归检查（需要 OpenGL，测试会创建并清理自己的临时数据）：
-
-```powershell
-& "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe" .\mujoco_teleop\tests\test_reproduction.py
-& "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe" .\mujoco_teleop\tests\test_act.py
-& "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe" .\mujoco_teleop\tests\test_rendering.py
-```
-
-检查现存数据保护、动作标签语义、完整积分状态恢复、IK 的物理副作用以及 Parquet 图像/动作的保存与读取。
-
-## 文件布局与 Git 管理
-
-需要重新检查全部主要链路时，可使用下列命令（当前本机已保留所需预训练文件）：
-
-```powershell
-& "$env:USERPROFILE\Apps\Anaconda\envs\my_env\python.exe" .\mujoco_teleop\scripts\recheck.py
-```
-
-每次创建新的输出目录，运行旧演示、测试、采集/回放、ACT 和 SmolVLA 的实际短步训练与重新加载、发布模型抓放、π0.5 数据转换和 π 模型就绪检查。短步训练只检查程序链路，不代替原长训练或自训模型的任务评测。π 模型检查通过执行也不等于已经能训练，须查看报告里的就绪字段。
-
-```text
-mujoco_teleop/
-  README.md                    安装、操作、数据格式与限制
-  run.py / run.ps1             启动入口
-  requirements.txt            第 1、2 部分的直接依赖
-  requirements-vla.txt        旧版 SmolVLA 附加依赖
-  requirements-pi05-cpu.lock.txt  独立 v3 数据测试环境锁文件
-  upstream_manifest.json      固定上游版本和原始资源校验值
-  environment-before.json     原有环境快照
-  scripts/                    依赖安装、上游资源获取
-  src/omy_repro/              本地采集、回放、环境适配
-  tests/                      数据/动作/状态恢复回归检查
-  vendor/every_embodied/       原始 Notebook、环境代码、OMY/杯盘模型
-  docs/                       复现日志、验证结果
-  .deps/                      本地依赖，Git 忽略
-  .venv-pi05/                 独立 Python 3.12 CPU 数据测试环境，Git 忽略
-  .downloads/                 下载和运行缓存，Git 忽略
-  data/                       采集数据，Git 忽略
-  outputs/                    回放报告和截图，Git 忽略
-```
-
-本次工作在 `codex/omy-collection-replay` 分支开发，并按用户要求上传到 `103xu/replica_embodied`。较大的示教、运行缓存不进入 Git，源码和必要模型资源保留在本仓库中。原有 `mujoco_demo/` 保持原样。
-
-第 3、4 部分在 `codex/act-training-deployment` 分支继续开发。采集/回放、ACT 和 GUI 相机一致性共 11 项检查通过；实际部署结果单独记录，不以单元测试通过替代抓放成功判定。
-
-第 5～10 部分在 `codex/vla-local-reproduction` 分支继续开发，当前新增命令与证据见上文。第 10 部分的严格加载单元测试使用模拟类检查失败处理；本机未加载完整 π0.5 模型。
-
-盘子的原始 OBJ 网格较大，因此 Git 保留上游的 `plate_11.zip`，解压目录通过 `.gitignore` 排除；当前本机保留解压后的完整模型，首次从 Git 克隆运行时会自动离线解压，不需要重新下载。这样避免直接提交大型原始网格。
+- 复现流程参考 [Datawhale Every-Embodied](https://github.com/datawhalechina/every-embodied)。
+- OMY 机械臂资源来自 [ROBOTIS MuJoCo Menagerie](https://github.com/ROBOTIS-GIT/robotis_mujoco_menagerie)。
+- 模型训练与数据接口使用 [Hugging Face LeRobot](https://github.com/huggingface/lerobot)。
+- MuJoCo Parser 参考 [yet-another-mujoco-tutorial-v3](https://github.com/sjchoi86/yet-another-mujoco-tutorial-v3)。
+- 杯子与盘子资源来自 [Objaverse](https://objaverse.allenai.org/)。
+- 其他来源与授权说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
