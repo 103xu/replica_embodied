@@ -458,6 +458,8 @@ Get-Content "$StudyLanguageData\meta\info.json" -TotalCount 15
 
 当前脚本会检查目标杯确实抬起至少 10cm、放到盘上、松爪并抬臂。这个检查**还不要求杯子竖直**，请继续做模块 9 的审计。脚本示教成功，仍然不表示 VLA 模型已经学会。
 
+需要把整个机械臂和桌面任务区域录进 GIF 时，在 `collect-language` 命令末尾加 `--overview-preview`。它使用独立的 640×480 展示相机，并在上方显示指令；训练数据中的两路 256×256 图像保持原样。`replay-language` 也支持此参数，用于从已有示教生成全景回放动画。采集 GIF 仍保存在数据目录的 `initial_states/`，回放 GIF 保存在指定输出目录。
+
 如果是新克隆且没有已有数据，采集完成后设置：
 
 ```powershell

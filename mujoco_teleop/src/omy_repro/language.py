@@ -10,6 +10,7 @@ from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
 from .dataset import FEATURES, write_run
 from .runtime import LanguageEnvironment, PROJECT, pace
 from .scripted import scripted_actions
+from .preview import OverviewPreview
 
 REPO_ID = 'datawhale_eai_pnp_language'
 
@@ -59,12 +60,15 @@ def collect(args):
                                     features=features, use_videos=False,
                                     image_writer_processes=0, image_writer_threads=2)
     env = None
+    overview = None
     results = []
     report = {'mode': 'scripted_ik' if args.scripted else 'keyboard', 'state_type': 'joint_angle',
               'action_type': 'absolute_joint_targets', 'observation_timing': 'before_command',
               'fps': 20, 'not_a_learned_policy': True, 'episodes': results, 'saved_episodes': 0}
     try:
         env = LanguageEnvironment(seed=args.seed, headless=args.headless)
+        if getattr(args, 'overview_preview', False):
+            overview = OverviewPreview(env)
         for episode in range(args.episodes):
             seed = args.seed + episode // 2
             env.reset(seed=seed)
@@ -102,7 +106,7 @@ def collect(args):
                                        'obj_init': env.obj_init_pose.copy()}, task=env.instruction)
                     frames += 1
                     if frames % 10 == 0:
-                        preview.append(Image.fromarray(agent))
+                        preview.append(overview.frame() if overview else Image.fromarray(agent))
                 env.advance()
                 env.show(agent, wrist)
                 maximum = max(maximum, target_height(env))
@@ -126,6 +130,8 @@ def collect(args):
             report['saved_episodes'] = len(results)
             print('LANGUAGE_EPISODE ' + json.dumps(results[-1]), flush=True)
     finally:
+        if overview is not None:
+            overview.close()
         if env is not None:
             env.close()
         dataset.stop_image_writer()
@@ -144,8 +150,11 @@ def replay(args):
         raise FileExistsError(f'Refusing to overwrite {output}')
     output.mkdir(parents=True)
     env = LanguageEnvironment(seed=0, headless=args.headless, action_type='joint_angle')
+    overview = None
     errors, frames, maximum, preview = [], 0, 0, []
     try:
+        if getattr(args, 'overview_preview', False):
+            overview = OverviewPreview(env)
         env.set_instruction(dataset[first]['task'])
         with np.load(Path(root) / 'initial_states' / f'episode_{args.episode:06d}.npz', allow_pickle=False) as archive:
             env.restore(archive['state'])
@@ -163,7 +172,7 @@ def replay(args):
             agent, wrist = env.images()
             env.show(agent, wrist)
             if frames % 10 == 0:
-                preview.append(Image.fromarray(agent))
+                preview.append(overview.frame() if overview else Image.fromarray(agent))
             frames += 1
             pace(start, args.fast)
         agent, wrist = env.images()
@@ -177,6 +186,8 @@ def replay(args):
         (output / 'replay_report.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
         print(json.dumps(report, indent=2), flush=True)
     finally:
+        if overview is not None:
+            overview.close()
         env.close()
 
 

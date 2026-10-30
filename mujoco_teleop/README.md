@@ -91,7 +91,13 @@ $SmolRun = ".\mujoco_teleop\checkpoints\smol_$RunTag"
 
 环境判定成功后自动保存一条示教。数据目录已存在时会停止，不会删除旧数据；未成功的键盘回合不保存为成功示教。
 
-> 【GIF 占位：键盘控制 OMY 完成抓杯、搬运和放置。】
+<p align="center">
+  <img src="docs/media/手动采集.gif"
+       width="600">
+</p>
+<p align="center">
+键盘采集演示
+</p>
 
 也可以先用脚本生成一条示教，验证整个流程。**下面与键盘采集二选一**，不能向同一个已有目录重复采集：
 
@@ -124,7 +130,13 @@ $SmolRun = ".\mujoco_teleop\checkpoints\smol_$RunTag"
 
 回放会恢复场景初始状态，按保存的动作重新驱动机械臂。主窗口显示当前仿真，叠加图像来自采集时保存的相机画面。
 
-> 【GIF 占位：单杯示教采集与动作回放的对比。】
+<p align="center">
+  <img src="docs/media/采集回放.gif"
+       width="600">
+</p>
+<p align="center">
+采集demo回放演示
+</p>
 
 本机 602 帧样例完整回放，任务判定成功，末端位置对齐误差为 **0**。这是相同机器、版本和初始状态下的结果。
 
@@ -145,7 +157,20 @@ $SmolRun = ".\mujoco_teleop\checkpoints\smol_$RunTag"
 
 训练目录保存 `best/`、`final/` 权重，以及损失曲线、预测动作对比和配置记录。
 
-> 【图片占位：ACT 训练损失曲线，以及预测动作与示教动作对比。】
+<p align="center">
+  <img src="docs/act_baseline/training_loss.png"
+       width="600">
+</p>
+<p align="center">
+training_loss
+</p>
+<p align="center">
+  <img src="docs/act_baseline/offline_actions.png"
+       width="600">
+</p>
+<p align="center">
+预测动作与示教动作对比
+</p>
 
 当前只有一条单杯示教，主要用于验证训练流程。离线动作误差下降后，还需要到下一节检查实际抓放。
 
@@ -175,9 +200,16 @@ $SmolRun = ".\mujoco_teleop\checkpoints\smol_$RunTag"
 
 本机续训后的 final 权重在有窗口和无窗口模式下均完成抓放，杯子抬升约 **21cm**。部署动作来自模型预测，不回放示教，也不由脚本接管。
 
-> 【GIF 占位：自训 ACT 模型完成单杯抓取与放置；可并列展示 10 步窗口失败对照。】
+<p align="center">
+  <img src="docs/media/act训练后采集.gif"
+       width="600">
+</p>
+<p align="center">
+ACT 独立控制机械臂完成抓杯、搬运和放置
+</p>
 
-当前机器可直接运行 `& $PythonExe .mujoco_teleopun.py deploy-act`，加载已有成功权重。该权重位于本机 `checkpoints/act_omy_chunk100/final`，不会随 Git 克隆下载。
+当前机器可直接运行 `& $PythonExe .mujoco_teleop
+un.py deploy-act`，加载已有成功权重。该权重位于本机 `checkpoints/act_omy_chunk100/final`，不会随 Git 克隆下载。
 
 ACT 的确认规则包含抬升超过 10cm、松爪、末端抬高和盘上连续保持 20 帧，未额外要求杯子竖直。成功验证使用与示教相同的 seed=0，尚不能说明泛化能力。
 
@@ -200,6 +232,20 @@ ACT 的确认规则包含抬升超过 10cm、松爪、末端抬高和盘上连�
 
 **数据示例**
 
+<p align="center">
+  <img src="docs/media/language_collect_red_overview.gif" width="600">
+  <img src="docs/media/language_collect_red.gif">
+</p>
+<p align="center">
+红杯任务的指令与回放画面
+</p>
+<p align="center">
+  <img src="docs/media/language_collect_blue_overview.gif" width="600">
+  <img src="docs/media/language_collect_blue.gif">
+</p>
+<p align="center">
+蓝杯任务的指令与回放画面
+</p>
 > 【GIF 占位：红杯、蓝杯指令对应的抓放数据与回放画面。】
 
 本机保存 **20 条、12,782 帧**，红杯与蓝杯各 10 条；全部轨迹回放的关节状态对齐误差为 0。进一步检查发现部分示教放置后杯子倾倒，第 9 节会单独审计。
@@ -246,7 +292,6 @@ $LanguageData = ".\mujoco_teleop\data\language_demo_020"
 
 估算来自 meta 设备参数统计，不是本机实际训练峰值。详细检查见 [π 模型诊断](docs/RECHECK_REPORT.md)。
 
-> 【图片占位：π0 运行条件检查结果，展示授权与显存问题；当前没有本机训练曲线或部署 GIF。】
 
 ## 8. 训练与部署 SmolVLA
 
@@ -266,7 +311,13 @@ $LanguageData = ".\mujoco_teleop\data\language_demo_020"
 
 **训练日志**
 
-> 【图片占位：SmolVLA 自训损失曲线与动作误差对比。】
+<p align="center">
+  <img src="docs/vla_results/smolvla_selftrain_loss_comparison.png" width="700">
+</p>
+
+<p align="center">
+  <img src="docs/vla_results/smolvla_selftrain_action_error_comparison.png" width="700">
+</p>
 
 **部署教程公开权重**
 
@@ -279,7 +330,12 @@ $LanguageData = ".\mujoco_teleop\data\language_demo_020"
 
 `--upstream-interface` 对齐原教程的夹爪映射、积分器，以及 800×600 渲染后缩放到 256×256 的相机流程。本机有窗口、无窗口验证均为红杯和蓝杯 **物理成功 2/2**，杯子保持竖直。
 
-> 【GIF 占位：教程公开 SmolVLA 权重分别执行红杯、蓝杯指令。】
+<p align="center">
+  <img src="docs/vla_results/smolvla_tutorial_gui_seed0_red.gif" width="280">
+  <img src="docs/vla_results/smolvla_tutorial_gui_seed0_blue.gif" width="280">
+</p>
+
+<p align="center">教程公开 SmolVLA 权重执行红杯和蓝杯指令</p>
 
 这项成功来自公开微调权重，与自训结果分别记录。两项 seed=0 任务用于当前场景验证，不作为泛化成功率。
 
